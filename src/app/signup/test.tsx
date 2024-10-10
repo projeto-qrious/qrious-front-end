@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SocialButton from "../components/Social";
+import SocialButton from "../../components/Social";
 import Google from "@/app/assets/Google.svg";
 import Apple from "@/app/assets/Apple.svg";
 import Mail from "@/app/assets/Mail.svg";

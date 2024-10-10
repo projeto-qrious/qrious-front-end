@@ -1,9 +1,10 @@
 "use client";
 
-import Card from "../components/Card";
-import Header from "../components/Header";
+import Card from "../../components/Card";
+import Header from "../../components/Header";
+import ProtectedRoute from "../../hoc/protectedRoutes";
 
-export default function Home() {
+function Home() {
   return (
     <>
       <Header />
@@ -35,5 +36,13 @@ export default function Home() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedRoute>
+      <Home />
+    </ProtectedRoute>
   );
 }

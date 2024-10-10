@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { BiLock } from "react-icons/bi";
-import CustomInput from "../components/CustomInput";
+import CustomInput from "../../components/CustomInput";
 import { MdEmail } from "react-icons/md";
-import Button from "../components/CustomButton";
-import SocialButton from "../components/Social";
+import Button from "../../components/CustomButton";
+import SocialButton from "../../components/Social";
 import Image from "next/image";
-import Google from "@/app/assets/Google.svg";
-import Facebook from "@/app/assets/Facebook.svg";
+import Google from "../../assets/Google.svg";
+import Facebook from "../../assets/Facebook.svg";
 import Link from "next/link";
 
 import {
@@ -16,53 +16,29 @@ import {
   signInWithFacebook,
   signInWithGoogle,
 } from "@/services/auth";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Esquema de validação com Zod
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "O campo é obrigatório." })
-    .email("Insira um e-mail válido."),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Signin() {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    trigger,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (name) {
-        trigger(name);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, trigger]);
-
-  const onSubmit = async (data: LoginFormValues) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     try {
-      const response = await loginUser(data.email, data.password);
-      console.log("Login bem-sucedido:", response);
+      const response = await loginUser(email, password);
+      router.push("/home");
     } catch (error) {
       console.error("Erro ao fazer login: ", error);
     }
   };
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/home");
+    }
+  }, [user, loading]);
 
   return (
     <div className="p-6 md:p-0 md:flex md:flex-row">
@@ -76,26 +52,30 @@ export default function Signin() {
           Olá, Bem vindo! 👋
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Formulário de login */}
+        <form onSubmit={onSubmit}>
           <div className="flex flex-col gap-4">
+            {/* Campo de e-mail */}
             <CustomInput
               label="Email"
               placeholder="Digite seu Email"
               leftIcon={<MdEmail className="text-gray-500" />}
               containerClassName="w-full"
-              {...register("email")}
-              error={errors.email?.message}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
+            {/* Campo de senha */}
             <CustomInput
               label="Password"
               placeholder="Digite sua senha"
               leftIcon={<BiLock className="text-gray-500" />}
               type="password"
               containerClassName="w-full"
-              {...register("password")}
-              error={errors.password?.message}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
+
             <Link href="/forgout">
               <p className="text-end text-gray-500">Esqueceu a senha?</p>
             </Link>

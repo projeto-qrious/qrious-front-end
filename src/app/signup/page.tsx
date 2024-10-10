@@ -1,79 +1,48 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BiLock } from "react-icons/bi";
-import CustomInput from "../components/CustomInput";
+import CustomInput from "../../components/CustomInput";
 import { FaUser } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
-import Button from "../components/CustomButton";
-import SocialButton from "../components/Social";
+import Button from "../../components/CustomButton";
+import SocialButton from "../../components/Social";
 import Image from "next/image";
-import Apple from "@/app/assets/Apple.svg";
-import Google from "@/app/assets/Google.svg";
-import Facebook from "@/app/assets/Facebook.svg";
+import Google from "../../assets/Google.svg";
+import Facebook from "../../assets/Facebook.svg";
 import Link from "next/link";
 import {
+  loginUser,
   registerUser,
   signInWithFacebook,
   signInWithGoogle,
 } from "@/services/auth";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Definição do esquema de validação com zod
-const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Nome de usuário deve ter pelo menos 3 caracteres." }),
-  email: z
-    .string()
-    .min(1, { message: "O campo é obrigatório." })
-    .email("Insira um e-mail válido."),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Signup() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    trigger, // Usado para disparar a validação em tempo real
-  } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-    },
-  });
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-  // Monitorar as mudanças nos valores dos campos para atualizar os erros
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      // Sempre que o valor mudar, disparar a validação do campo específico
-      if (name) {
-        trigger(name);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, trigger]);
-
-  const onSubmit = async (data: RegisterFormValues) => {
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     try {
-      const response = await registerUser(
-        data.email,
-        data.password,
-        data.username
-      );
-      console.log("Registro bem-sucedido:", response);
+      const response = await registerUser(email, password, username);
+      await loginUser(email, password);
+      router.push("/home");
     } catch (error) {
       console.error("Erro ao registrar: ", error);
     }
   };
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/home");
+    }
+  }, [user, loading]);
 
   return (
     <div className="p-6 md:p-0 md:flex md:flex-row">
@@ -87,8 +56,8 @@ export default function Signup() {
           Criar Conta
         </h2>
 
-        {/* Formulário com `handleSubmit` do react-hook-form */}
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Formulário com onSubmit para enviar os dados */}
+        <form onSubmit={onSubmit}>
           <div className="flex flex-col gap-4">
             {/* Componente CustomInput para Nome */}
             <CustomInput
@@ -96,8 +65,8 @@ export default function Signup() {
               placeholder="Digite seu nome de usuário"
               leftIcon={<FaUser className="text-gray-500" />}
               containerClassName="w-full"
-              {...register("username")}
-              error={errors.username?.message}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
 
             {/* Componente CustomInput para Email */}
@@ -106,8 +75,8 @@ export default function Signup() {
               placeholder="Digite seu Email"
               leftIcon={<MdEmail className="text-gray-500" />}
               containerClassName="w-full"
-              {...register("email")}
-              error={errors.email?.message}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
             {/* Componente CustomInput para Senha */}
@@ -117,8 +86,8 @@ export default function Signup() {
               leftIcon={<BiLock className="text-gray-500" />}
               type="password"
               containerClassName="w-full"
-              {...register("password")}
-              error={errors.password?.message}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 

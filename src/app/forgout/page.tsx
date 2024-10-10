@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import CustomInput from "../components/CustomInput";
+import CustomInput from "../../components/CustomInput";
 import { MdEmail } from "react-icons/md";
-import Button from "../components/CustomButton";
-import Goback from "../components/GobackIcon";
+import Button from "../../components/CustomButton";
+import Goback from "../../components/GobackIcon";
 import Link from "next/link";
 
 export default function Forgout() {
