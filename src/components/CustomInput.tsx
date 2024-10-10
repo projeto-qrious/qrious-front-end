@@ -12,7 +12,8 @@ interface CustomInputProps {
   type?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: string; // Novo prop para exibir erros
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void; // Adicione o onBlur
+  error?: string;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -26,11 +27,11 @@ const CustomInput: React.FC<CustomInputProps> = ({
   type = "text",
   value,
   onChange,
-  error, // Recebe o erro de validação
+  onBlur, // Receber o onBlur como prop
+  error,
 }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
-  // Lida com o toggle da visibilidade da senha
   const handleTogglePassword = () => {
     setPasswordVisible(!isPasswordVisible);
   };
@@ -46,13 +47,14 @@ const CustomInput: React.FC<CustomInputProps> = ({
       )}
 
       <div className="relative flex items-center">
-        {/* Ícone esquerdo, se existir */}
         {leftIcon && <span className="absolute left-3">{leftIcon}</span>}
 
+        {/* Passar `value`, `onChange`, e `onBlur` diretamente */}
         <input
           type={type === "password" && isPasswordVisible ? "text" : type}
           value={value}
           onChange={onChange}
+          onBlur={onBlur} // Adicione onBlur para garantir que o hook capture o evento de blur
           placeholder={placeholder}
           className={`w-full px-4 py-3 rounded-md border ${
             error ? "border-red-500" : "border-gray-300"
@@ -63,7 +65,6 @@ const CustomInput: React.FC<CustomInputProps> = ({
           } ${inputClassName}`}
         />
 
-        {/* Ícone direito para alternar visibilidade da senha */}
         {type === "password" && (
           <span
             onClick={handleTogglePassword}
@@ -73,13 +74,11 @@ const CustomInput: React.FC<CustomInputProps> = ({
           </span>
         )}
 
-        {/* Caso tenha ícone direito fornecido (não para senha) */}
         {rightIcon && type !== "password" && (
           <span className="absolute right-3">{rightIcon}</span>
         )}
       </div>
 
-      {/* Mensagem de erro se existir */}
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );

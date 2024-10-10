@@ -1,4 +1,4 @@
-import { auth } from "../app/configs/firebaseconfig";
+import { auth } from "../configs/firebaseconfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -7,9 +7,7 @@ import {
   FacebookAuthProvider,
 } from "firebase/auth";
 
-import axios from "axios";
-
-const API_URL = "http://localhost:3001";
+import api from "./api";
 
 export async function registerUser(
   email: string,
@@ -25,7 +23,7 @@ export async function registerUser(
       delete payload.phoneNumber;
     }
 
-    const response = await axios.post(`${API_URL}/auth/register`, payload);
+    const response = await api.post(`/auth/register`, payload);
 
     return response.data;
   } catch (error) {
@@ -46,7 +44,7 @@ export async function loginUser(email: string, password: string) {
     const idToken = await user.getIdToken();
     localStorage.setItem("token", idToken);
 
-    const response = await axios.post(`${API_URL}/auth/verify-token`, {
+    const response = await api.post(`/auth/verify-token`, {
       idToken,
     });
 

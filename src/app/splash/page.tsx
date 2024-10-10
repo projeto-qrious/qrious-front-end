@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Button from "../components/CustomButton";
+import Button from "../../components/CustomButton";
 
 export default function Splash() {
   return (
