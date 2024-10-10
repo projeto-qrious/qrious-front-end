@@ -12,7 +12,7 @@ import Google from "@/app/assets/Google.svg";
 import Facebook from "@/app/assets/Facebook.svg";
 import Link from "next/link";
 
-export default function Signup() {
+export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -58,6 +58,9 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               containerClassName="w-full"
             />
+            <Link href="/forgout">
+              <p className="text-end text-gray-500">Esqueceu a senha?</p>
+            </Link>
           </div>
 
           <Button label="Entrar" className="my-8" />
