@@ -18,6 +18,7 @@ import {
 } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Signin() {
   const [email, setEmail] = useState("");
@@ -28,9 +29,11 @@ export default function Signin() {
     event.preventDefault();
     try {
       const response = await loginUser(email, password);
+      toast.success("Login realizado com sucesso!");
       router.push("/home");
     } catch (error) {
       console.error("Erro ao fazer login: ", error);
+      toast.error("Erro ao realizar login");
     }
   };
 

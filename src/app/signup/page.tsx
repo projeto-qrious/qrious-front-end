@@ -19,6 +19,7 @@ import {
 } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -32,9 +33,11 @@ export default function Signup() {
     try {
       const response = await registerUser(email, password, username);
       await loginUser(email, password);
+      toast.success("Usuário cadastrado com sucesso!");
       router.push("/home");
     } catch (error) {
       console.error("Erro ao registrar: ", error);
+      toast.error("Erro ao cadastrar o usuário");
     }
   };
 

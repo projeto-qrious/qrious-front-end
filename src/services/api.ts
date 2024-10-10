@@ -1,18 +1,18 @@
 import axios from "axios";
 
-const API_URL = "http://172.16.34.82:3001";
+const API_URL = "http://localhost:3001"; // Seu backend
 
 const api = axios.create({
   baseURL: API_URL,
 });
 
-// Request interceptor to add the token to headers
+// Interceptor para incluir o token JWT no cabeçalho de Authorization
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token"); // Recupera o token do localStorage
 
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`; // Adiciona o token ao cabeçalho
     }
 
     return config;
