@@ -1,5 +1,4 @@
-import Signin from "./signin/page";
-
-export default function Home() {
-  return <Signin />;
+import Home from "@/app/home/page";
+export default function App() {
+  return <Home />;
 }

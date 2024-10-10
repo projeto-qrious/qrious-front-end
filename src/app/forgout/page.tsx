@@ -4,6 +4,8 @@ import { useState } from "react";
 import CustomInput from "../components/CustomInput ";
 import { MdEmail } from "react-icons/md";
 import Button from "../components/CustomButton";
+import Goback from "../components/GobackIcon";
+import Link from "next/link";
 
 export default function Forgout() {
   const [email, setEmail] = useState("");
@@ -16,6 +18,11 @@ export default function Forgout() {
   return (
     <div className="p-6 md:p-0 md:flex md:flex-row">
       <section className="md:h-screen md:w-full md:flex md:items-center md:justify-center md:bg-[#0094C611]">
+        <div className="absolute left-6 top-8">
+          <Link href="/signin">
+            <Goback />
+          </Link>
+        </div>
         <h1
           className="text-center font-bold text-4xl pt-4
           md:text-5xl
@@ -25,7 +32,7 @@ export default function Forgout() {
           QRious
         </h1>
       </section>
-      <section className="md:w-full md:h-screen md:p-24">
+      <section className="md:w-full md:h-screen md:p-24 md:flex md:flex-col md:justify-center">
         <h2 className="text-start font-bold text-2xl pt-16 pb-2 md:pt-0">
           Esqueceu a senha? 🤔
         </h2>

@@ -27,16 +27,18 @@ export default function Splash() {
         </p>
 
         <div className="pt-8 flex flex-col gap-4 lg:gap-8 lg:items-center lg:pt-14">
-          <Link href="/signup">
+          <Link href="/signin">
             <Button
               label="Entrar"
               className="font-bold lg:text-lg lg:w-[500px]"
             />
           </Link>
-          <Button
-            label="Criar Conta"
-            className="bg-white border border-black text-black font-bold lg:text-lg lg:w-[500px]"
-          />
+          <Link href="/signup">
+            <Button
+              label="Criar Conta"
+              className=" bg-white border border-black text-[#000] font-bold lg:text-lg lg:w-[500px]"
+            />
+          </Link>
         </div>
       </div>
     </div>
