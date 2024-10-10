@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "sessions": {
+      ".indexOn": ["sessionCode"],
+      "$sessionId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'SPEAKER'",
+        "questions": {
+          "$questionId": {
+            ".read": "auth != null",
+            ".write": "auth != null",
+            ".validate": "newData.exists() && (auth.uid === newData.child('createdBy').val() || root.child('users').child(auth.uid).child('role').val() === 'SPEAKER')",
+            "votes": {
+              ".read": "auth != null",
+              ".write": "auth != null && !data.exists()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

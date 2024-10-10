@@ -12,6 +12,7 @@ interface CustomInputProps {
   type?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: string; // Novo prop para exibir erros
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -25,6 +26,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   type = "text",
   value,
   onChange,
+  error, // Recebe o erro de validação
 }) => {
   const [isPasswordVisible, setPasswordVisible] = useState(false);
 
@@ -52,8 +54,11 @@ const CustomInput: React.FC<CustomInputProps> = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
-          ${leftIcon ? "pl-10" : ""} ${
+          className={`w-full px-4 py-3 rounded-md border ${
+            error ? "border-red-500" : "border-gray-300"
+          } focus:outline-none focus:ring-2 ${
+            error ? "focus:ring-red-500" : "focus:ring-indigo-500"
+          } ${leftIcon ? "pl-10" : ""} ${
             rightIcon || type === "password" ? "pr-10" : ""
           } ${inputClassName}`}
         />
@@ -73,6 +78,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
           <span className="absolute right-3">{rightIcon}</span>
         )}
       </div>
+
+      {/* Mensagem de erro se existir */}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 };
