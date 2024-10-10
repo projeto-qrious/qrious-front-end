@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import CustomInput from "../components/CustomInput ";
+import CustomInput from "../components/CustomInput";
 import { MdEmail } from "react-icons/md";
 import Button from "../components/CustomButton";
 
