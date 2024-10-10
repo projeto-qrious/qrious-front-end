@@ -13,6 +13,7 @@ function Home() {
   const [sessionDescription, setSessionDescription] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [sessionCode, setSessionCode] = useState("");
 
   // Função para lidar com a criação da sessão
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -22,7 +23,8 @@ function Home() {
         title: sessionTitle,
         description: sessionDescription,
       });
-      setSuccess(`Sessão criada com sucesso! QRCode: ${newSession.qrcode}`);
+      setSuccess(newSession.qrcode);
+      setSessionCode(newSession.sessionCode);
       setError("");
     } catch (error) {
       setError("Erro ao criar sessão. Tente novamente.");
@@ -68,7 +70,8 @@ function Home() {
                 Criar Sessão
               </button>
               {error && <p className="text-red-500 mt-2">{error}</p>}
-              {success && <p className="text-green-500 mt-2">{success}</p>}
+              {success && <img src={success} />}
+              {sessionCode && <p>{sessionCode}</p>}
             </form>
           </div>
         )}

@@ -3,9 +3,11 @@ import { IoClose, IoMenu } from "react-icons/io5";
 import { motion } from "framer-motion";
 import { MdLogout } from "react-icons/md";
 import { FaBook, FaHeart } from "react-icons/fa";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -46,7 +48,10 @@ const Header: React.FC = () => {
             <IoClose size={24} />
           </button>
           <div className="absolute bottom-4 left-0 w-full p-4">
-            <button className="w-ful text-red-700 py-2 rounded-lg transition-colors">
+            <button
+              onClick={logout}
+              className="w-ful text-red-700 py-2 rounded-lg transition-colors"
+            >
               <MdLogout size={32} />
             </button>
           </div>

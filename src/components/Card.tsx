@@ -20,7 +20,7 @@ const Card: React.FC<CardProps> = ({ title, text, initialLikes }) => {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="max-w-sm rounded overflow-hidden shadow-lg p-4 bg-white my-6 cursor-pointer"
+      className="max-w-sm z-[-1] rounded overflow-hidden shadow-lg p-4 bg-white my-6 cursor-pointer"
     >
       <div className="flex items-start mb-4">
         <h2 className="text-xl font-bold">{title}</h2>
