@@ -1,124 +1,181 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BiLock } from "react-icons/bi";
-import CustomInput from "../../components/CustomInput";
-import { MdEmail } from "react-icons/md";
-import Button from "../../components/CustomButton";
-import SocialButton from "../../components/Social";
-import Image from "next/image";
-import Google from "../../assets/Google.svg";
-import Facebook from "../../assets/Facebook.svg";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { useAuth } from "@/contexts/AuthContext";
 import {
   loginUser,
-  signInWithFacebook,
   signInWithGoogle,
+  signInWithFacebook,
 } from "@/services/auth";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
 
-export default function Signin() {
+export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { user, loading } = useAuth();
   const router = useRouter();
-  const onSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      const response = await loginUser(email, password);
-      toast.success("Login realizado com sucesso!");
-      router.push("/home");
-    } catch (error) {
-      console.error("Erro ao fazer login: ", error);
-      toast.error("Erro ao realizar login");
-    }
-  };
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && user) {
       router.push("/home");
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      await loginUser(email, password);
+      toast({ title: "Success", description: "Login successful!" });
+      router.push("/home");
+    } catch (error) {
+      console.error("Error logging in: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to log in. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
-    <div className="p-6 md:p-0 md:flex md:flex-row">
-      <section className="md:h-screen md:w-full md:flex md:items-center md:justify-center md:bg-[#0094C611]">
-        <h1 className="text-center font-bold text-4xl pt-4 md:text-5xl lg:text-8xl">
+    <div className="min-h-screen bg-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-4xl font-bold text-gray-900 mb-6">
           QRious
         </h1>
-      </section>
-      <section className="md:w-full md:h-screen md:p-24">
-        <h2 className="text-start font-bold text-2xl pt-16 pb-8 md:pt-0">
-          Olá, Bem vindo! 👋
-        </h2>
-
-        {/* Formulário de login */}
-        <form onSubmit={onSubmit}>
-          <div className="flex flex-col gap-4">
-            {/* Campo de e-mail */}
-            <CustomInput
-              label="Email"
-              placeholder="Digite seu Email"
-              leftIcon={<MdEmail className="text-gray-500" />}
-              containerClassName="w-full"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            {/* Campo de senha */}
-            <CustomInput
-              label="Password"
-              placeholder="Digite sua senha"
-              leftIcon={<BiLock className="text-gray-500" />}
-              type="password"
-              containerClassName="w-full"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <Link href="/forgout">
-              <p className="text-end text-gray-500">Esqueceu a senha?</p>
-            </Link>
-          </div>
-
-          <Button label="Entrar" type="submit" className="my-8" />
-        </form>
-
-        <div className="flex flex-row gap-1 items-baseline">
-          <div className="relative w-full">
-            <div className="border-t border-gray-300 w-full mb-1"></div>
-          </div>
-
-          <p className="font-normal text-base text-center text-gray-700 pb-4 text-nowrap">
-            Ou entrar com
-          </p>
-          <div className="relative w-full">
-            <div className="border-t border-gray-300 w-full mb-1"></div>
-          </div>
-        </div>
-        <div className="flex flex-row justify-around pb-6 gap-2">
-          <SocialButton
-            icon={<Image alt="Google" src={Google} width={32} />}
-            className="bg-transparent border border-gray-300 p-4 w-24 h-14"
-            onClick={signInWithGoogle}
-          />
-          <SocialButton
-            icon={<Image alt="Facebook" src={Facebook} width={32} />}
-            className="bg-transparent border border-gray-300 p-4 w-24 h-14"
-            onClick={signInWithFacebook}
-          />
-        </div>
-
-        <div className="flex flex-row gap-2 justify-center items-center">
-          <p className="text-base">Não tem uma conta?</p>
-          <Link href="/signup">
-            <p className="text-base text-[#0094C6] font-bold">Cadastrar</p>
-          </Link>
-        </div>
-      </section>
+        <Card className="bg-white shadow-lg">
+          <CardHeader className="text-black">
+            <CardTitle className="text-2xl font-semibold text-center">
+              Sign In
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" aria-hidden="true" />
+                      ) : (
+                        <Eye className="h-5 w-5" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-end">
+                <Link href="/forgot-password" className="text-sm text-black">
+                  Forgot your password?
+                </Link>
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+              >
+                Sign In
+              </Button>
+            </form>
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  onClick={signInWithGoogle}
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  <Google className="h-5 w-5 mr-2 text-[#560bad]" />
+                  Google
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={signInWithFacebook}
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  <Facebook className="h-5 w-5 mr-2 text-[#3a0ca3]" />
+                  Facebook
+                </Button>
+              </div>
+            </div>
+            <p className="mt-6 text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-[#560bad] hover:text-[#3a0ca3]"
+              >
+                Sign up
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

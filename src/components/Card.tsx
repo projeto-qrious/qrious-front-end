@@ -1,6 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
-import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface CardProps {
   title: string;
@@ -8,7 +12,7 @@ interface CardProps {
   initialLikes: number;
 }
 
-const Card: React.FC<CardProps> = ({ title, text, initialLikes }) => {
+const QuestionCard: React.FC<CardProps> = ({ title, text, initialLikes }) => {
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -19,25 +23,30 @@ const Card: React.FC<CardProps> = ({ title, text, initialLikes }) => {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="max-w-sm z-[-1] rounded overflow-hidden shadow-lg p-4 bg-white my-6 cursor-pointer"
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
     >
-      <div className="flex items-start mb-4">
-        <h2 className="text-xl font-bold">{title}</h2>
-      </div>
-      <p className="text-gray-700 text-base mb-4 line-clamp-3">{text}</p>
-      <motion.div whileTap={{ scale: 1.02 }} className="flex items-center">
-        <button onClick={handleLike} className="flex items-center">
-          {isLiked ? (
-            <FaHeart className="text-red-500 mr-1 h-5 w-5" />
-          ) : (
-            <FaRegHeart className="text-gray-500 mr-1 h-5 w-5" />
-          )}
-          <span className="text-gray-600">{likes}</span>
-        </button>
-      </motion.div>
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600 mb-4 line-clamp-3">{text}</p>
+          <div className="flex items-center">
+            <Button
+              variant={isLiked ? "default" : "outline"}
+              size="sm"
+              onClick={handleLike}
+              className="flex items-center space-x-1"
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+              <span>{likes}</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
 
-export default Card;
+export default QuestionCard;

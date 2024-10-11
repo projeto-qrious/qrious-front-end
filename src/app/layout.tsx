@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "QRious",
@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="pt-br">
       <AuthProvider>
         <body>
-          <Toaster position="top-right" />
+          <Toaster />
           {children}
         </body>
       </AuthProvider>
