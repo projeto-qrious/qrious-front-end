@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/hoc/protectedRoutes";
-import GoBack from "@/components/goBack";
 import { ArrowLeft } from "lucide-react";
+
+// Definindo a interface para tipar a sessão
+interface Session {
+  sessionCode: string;
+  qrcode: string;
+  title: string;
+  description: string;
+  // Outros campos, se houver
+}
 
 const DetalhesSessao = () => {
   const router = useRouter();
@@ -16,8 +24,9 @@ const DetalhesSessao = () => {
   const sessionId = Array.isArray(params?.sessionId)
     ? params.sessionId[0]
     : params?.sessionId;
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  // Remova 'user' se não for necessário
   const { user } = useAuth();
 
   useEffect(() => {
@@ -35,14 +44,22 @@ const DetalhesSessao = () => {
       };
       buscarDetalhesSessao();
     }
-  }, [sessionId]);
+  }, [sessionId, router]);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#560bad]"></div>
+      </div>
+    );
   }
 
   if (!session) {
-    return <div>Sessão não encontrada.</div>;
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Sessão não encontrada.</p>
+      </div>
+    );
   }
 
   return (
@@ -58,13 +75,17 @@ const DetalhesSessao = () => {
           <CardContent className="space-y-8">
             {/* Seção para QR Code e Código da Sessão */}
             <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="p-4 border-2 border-gray-300 rounded-lg shadow-lg">
-                <img
-                  src={session.qrcode}
-                  alt="QR Code da Sessão"
-                  className="mx-auto w-full h-full"
-                />
-              </div>
+              {session.qrcode ? (
+                <div className="p-4 border-2 border-gray-300 rounded-lg shadow-lg">
+                  <img
+                    src={session.qrcode}
+                    alt="QR Code da Sessão"
+                    className="mx-auto w-full h-full"
+                  />
+                </div>
+              ) : (
+                <p className="text-red-500">QR Code não disponível</p>
+              )}
               <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-2 rounded-md shadow-md">
                 Código da sessão:{" "}
                 <span className="text-2xl text-[#560bad] font-bold">
@@ -86,15 +107,15 @@ const DetalhesSessao = () => {
               <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                 onClick={() => {
-                  navigator.share
-                    ? navigator.share({
-                        title: "Entre na minha sessão no QRious",
-                        text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
-                        url: window.location.href,
-                      })
-                    : alert(
-                        "Compartilhamento não é suportado nesse navegador."
-                      );
+                  if (navigator.share) {
+                    navigator.share({
+                      title: "Entre na minha sessão no QRious",
+                      text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
+                      url: window.location.href,
+                    });
+                  } else {
+                    alert("Compartilhamento não é suportado nesse navegador.");
+                  }
                 }}
               >
                 Compartilhar
