@@ -60,7 +60,7 @@ const SessionPage = () => {
           </CardContent>
         </Card>
 
-        <h2 className="text-xl font-semibold mb-4 text-[#560bad]">Questions</h2>
+        <h2 className="text-xl font-semibold mb-4 text-[#560bad]">Perguntas</h2>
         <div className="space-y-4">
           {session?.questions &&
             Object.values(session.questions).map((question: any) => (

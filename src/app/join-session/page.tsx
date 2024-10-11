@@ -26,12 +26,14 @@ const JoinSession = () => {
 
   const handleJoinSession = async () => {
     if (!user) {
-      setError("You must be authenticated to join a session.");
+      setError("Você deve estar autenticado para entrar em uma sessão.");
       return;
     }
 
     if (!sessionCode) {
-      setError("Please enter a session code or scan a QR code to join.");
+      setError(
+        "Por favor, insira um código de sessão ou escaneie um QR code para entrar."
+      );
       return;
     }
 
@@ -45,8 +47,10 @@ const JoinSession = () => {
       );
       router.push(`/sessions/${returnedSessionId}`);
     } catch (err: any) {
-      console.error("Error joining session: ", err);
-      setError("Failed to join session. Please check the code provided.");
+      console.error("Erro ao entrar na sessão: ", err);
+      setError(
+        "Falha ao entrar na sessão. Por favor, verifique o código fornecido."
+      );
     } finally {
       setLoading(false);
     }
@@ -102,12 +106,12 @@ const JoinSession = () => {
 
         setSessionCode(result.getText());
       } else {
-        setError("Camera not available.");
+        setError("Câmera não disponível.");
       }
     } catch (err) {
-      console.error("Error scanning QR code: ", err);
+      console.error("Erro ao escanear o QR code: ", err);
       setError(
-        "Failed to scan QR code. Please ensure your camera is accessible and try again."
+        "Falha ao escanear o QR code. Por favor, certifique-se de que a câmera está acessível e tente novamente."
       );
     } finally {
       setIsScanning(false);
@@ -127,12 +131,12 @@ const JoinSession = () => {
         <Card className="bg-white shadow-lg">
           <CardHeader className=" text-black">
             <CardTitle className="text-2xl font-bold text-center">
-              Join a Session
+              Entrar em uma Sessão
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-gray-600">
-              Enter the session code or scan a QR code to join.
+              Insira o código da sessão ou escaneie um QR code para entrar.
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -141,7 +145,7 @@ const JoinSession = () => {
                   type="text"
                   value={sessionCode}
                   onChange={(e) => setSessionCode(e.target.value)}
-                  placeholder="Session Code"
+                  placeholder="Código da Sessão"
                   className="flex-1 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
                 />
               </div>
@@ -152,22 +156,22 @@ const JoinSession = () => {
                   className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                 >
                   <QrCode className="w-5 h-5 mr-2" />
-                  {isScanning ? "Scanning..." : "Scan QR Code"}
+                  {isScanning ? "Escaneando..." : "Escanear QR Code"}
                 </Button>
               </div>
             </div>
             {isScanning && (
               <div className="mt-4">
-                {/* Video element for QR code scanning */}
+                {/* Elemento de vídeo para escanear QR code */}
                 <video
-                  ref={videoRef} // Ref assignment
+                  ref={videoRef} // Atribuição da referência
                   className="w-full h-auto border rounded"
                 />
                 <Button
                   onClick={handleStopScanning}
                   className="mt-2 bg-red-600 hover:bg-red-700 text-white w-full"
                 >
-                  Stop Scanning
+                  Parar Escaneamento
                 </Button>
               </div>
             )}
@@ -176,7 +180,7 @@ const JoinSession = () => {
               disabled={loading}
               className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
             >
-              {loading ? "Joining..." : "Join Session"}
+              {loading ? "Entrando..." : "Entrar na Sessão"}
             </Button>
             {error && (
               <p className="text-red-500 text-center text-sm">{error}</p>

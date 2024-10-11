@@ -10,7 +10,7 @@ import ProtectedRoute from "@/hoc/protectedRoutes";
 import GoBack from "@/components/goBack";
 import { ArrowLeft } from "lucide-react";
 
-const SessionDetails = () => {
+const DetalhesSessao = () => {
   const router = useRouter();
   const params = useParams();
   const sessionId = Array.isArray(params?.sessionId)
@@ -22,27 +22,27 @@ const SessionDetails = () => {
 
   useEffect(() => {
     if (sessionId) {
-      const fetchSessionDetails = async () => {
+      const buscarDetalhesSessao = async () => {
         try {
           const sessionData = await getSessionDetails(sessionId as string);
           setSession(sessionData);
         } catch (error) {
-          console.error("Error fetching session details:", error);
+          console.error("Erro ao buscar detalhes da sessão:", error);
           router.push("/home");
         } finally {
           setLoading(false);
         }
       };
-      fetchSessionDetails();
+      buscarDetalhesSessao();
     }
   }, [sessionId]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Carregando...</div>;
   }
 
   if (!session) {
-    return <div>Session not found.</div>;
+    return <div>Sessão não encontrada.</div>;
   }
 
   return (
@@ -52,20 +52,20 @@ const SessionDetails = () => {
         <Card className="bg-white shadow-lg p-8">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-center mb-8 text-[#560bad]">
-              Session Details
+              Detalhes da Sessão
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-8">
-            {/* Section for QR Code and Session Code */}
+            {/* Seção para QR Code e Código da Sessão */}
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="p-4 border-2 border-gray-300 rounded-lg shadow-lg">
                 <img
                   src={session.qrcode}
-                  alt="Session QR Code"
+                  alt="QR Code da Sessão"
                   className="mx-auto w-full h-full"
                 />
               </div>
-              <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-3 rounded-md shadow-md">
+              <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-2 rounded-md shadow-md">
                 Código da sessão:{" "}
                 <span className="text-2xl text-[#560bad] font-bold">
                   {session.sessionCode}
@@ -73,7 +73,7 @@ const SessionDetails = () => {
               </p>
             </div>
 
-            {/* Section for Session Details */}
+            {/* Seção para Detalhes da Sessão */}
             <div className="text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 {session.title}
@@ -81,7 +81,7 @@ const SessionDetails = () => {
               <p className="text-lg text-gray-600">{session.description}</p>
             </div>
 
-            {/* Action Buttons */}
+            {/* Botões de Ação */}
             <div className="flex justify-center space-x-4">
               <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
@@ -104,7 +104,7 @@ const SessionDetails = () => {
                 onClick={() => router.push("/home")}
               >
                 <ArrowLeft className="mr-2 mt-0.5 h-4 w-4" />
-                Página inicial
+                Página Inicial
               </Button>
             </div>
           </CardContent>
@@ -114,10 +114,10 @@ const SessionDetails = () => {
   );
 };
 
-export default function SessionDetailsPage() {
+export default function PaginaDetalhesSessao() {
   return (
     <ProtectedRoute>
-      <SessionDetails />
+      <DetalhesSessao />
     </ProtectedRoute>
   );
 }
