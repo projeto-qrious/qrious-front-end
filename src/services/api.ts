@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://192.168.1.103:3002";
+const API_URL = "http://192.168.1.188:3001";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,10 +8,10 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Recupera o token do localStorage
+    const token = localStorage.getItem("token");
 
     if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`; // Adiciona o token ao cabeçalho
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
     return config;

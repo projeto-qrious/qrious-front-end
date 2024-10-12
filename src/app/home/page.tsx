@@ -1,33 +1,31 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { createSession } from "@/services/sessions";
+import { createSession, fetchUserSessions } from "@/services/sessions"; // Função que busca as sessões do usuário
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import ProtectedRoute from "@/hoc/protectedRoutes";
 import { QrCode, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Session {
   sessionId: string;
   title: string;
   description: string;
-  sessionCode: string;
-  qrcode: string;
 }
 
 function Home() {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const router = useRouter();
   const [sessionTitle, setSessionTitle] = useState("");
   const [sessionDescription, setSessionDescription] = useState("");
   const [newSession, setNewSession] = useState<Session | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const { toast } = useToast();
 
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -53,13 +51,30 @@ function Home() {
     }
   };
 
+  // Função para buscar as sessões que o usuário já entrou
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        if (user?.uid) {
+          const userSessions = await fetchUserSessions(user.uid);
+          setSessions(userSessions);
+        }
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: `Falha ao carregar as sessões. ${error}`,
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadSessions();
+  }, [user?.uid, toast]);
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
       <main className="container mx-auto px-4 pt-28 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8 text-gray-900">
-          Perguntas QRious
-        </h1>
         <div className="grid gap-8 md:grid-cols-2">
           <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardHeader>
@@ -76,6 +91,7 @@ function Home() {
               </Link>
             </CardContent>
           </Card>
+
           {role === "SPEAKER" && (
             <Card className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
               <CardHeader>
@@ -141,6 +157,42 @@ function Home() {
               </CardContent>
             </Card>
           )}
+        </div>
+
+        {/* Seção para exibir as sessões que o usuário já entrou */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-4">Minhas Sessões</h2>
+          <div className="grid gap-6">
+            {sessions.length > 0 ? (
+              sessions.map((session) => (
+                <Card
+                  key={session.sessionId}
+                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg">{session.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 h-[3em] line-clamp-2 overflow-hidden text-ellipsis mb-1">
+                      {session.description}
+                    </p>
+                    <Button
+                      onClick={() =>
+                        router.push(`/sessions/${session.sessionId}`)
+                      }
+                      className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                    >
+                      Ver Detalhes da Sessão
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p className="text-gray-600">
+                Você ainda não entrou em nenhuma sessão.
+              </p>
+            )}
+          </div>
         </div>
       </main>
     </div>

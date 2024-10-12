@@ -1,4 +1,3 @@
-import axios from "axios";
 import api from "./api"; // axios com interceptors para enviar o token
 
 export interface CreateSessionData {
@@ -27,6 +26,16 @@ export async function joinSession(
     return response.data; // Retorna o sessionId do backend para ser usado no redirecionamento
   } catch (error) {
     console.error("Erro ao entrar na sessão:", error);
+    throw error;
+  }
+}
+
+export async function fetchUserSessions(userId: string) {
+  try {
+    const response = await api.get(`/sessions/user/${userId}`);
+    return response.data; // Retorna as sessões do usuário
+  } catch (error) {
+    console.error("Erro ao carregar as sessões do usuário:", error);
     throw error;
   }
 }
