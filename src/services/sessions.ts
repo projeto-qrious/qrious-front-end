@@ -40,6 +40,16 @@ export async function fetchUserSessions(userId: string) {
   }
 }
 
+export async function fetchSessionsBySpeaker() {
+  try {
+    const response = await api.get(`/sessions/speaker/createdSessions`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao carregar as sessões do usuário:", error);
+    throw error;
+  }
+}
+
 export async function fetchSession(sessionId: string) {
   try {
     const response = await api.get(`/sessions/${sessionId}`);
@@ -56,6 +66,43 @@ export async function getSessionDetails(sessionId: string) {
     return response.data;
   } catch (error) {
     console.error("Error fetching session details:", error);
+    throw error;
+  }
+}
+
+export async function createQuestion(sessionId: string, text: string) {
+  try {
+    const response = await api.post(`/sessions/questions`, { sessionId, text });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating a question:", error);
+    throw error;
+  }
+}
+
+export async function fetchQuestionDetails(
+  sessionId: string,
+  questionId: string
+) {
+  try {
+    const response = await api.get(
+      `/sessions/${sessionId}/questions/${questionId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar os detalhes da pergunta:", error);
+    throw error;
+  }
+}
+
+export async function voteQuestion(sessionId: string, questionId: string) {
+  try {
+    const response = await api.post(
+      `/sessions/${sessionId}/questions/${questionId}/vote`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating a question:", error);
     throw error;
   }
 }

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, Hash } from "lucide-react";
 import GoBack from "@/components/goBack";
 import { BrowserQRCodeReader } from "@zxing/browser";
+import { WithAuth } from "@/hoc/withAuth";
 
 const JoinSession = () => {
   // Estado para o código da sessão e o QRCode
@@ -192,4 +193,4 @@ const JoinSession = () => {
   );
 };
 
-export default JoinSession;
+export default WithAuth(JoinSession);

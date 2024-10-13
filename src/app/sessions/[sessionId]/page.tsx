@@ -1,14 +1,25 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
-import { getSessionDetails } from "@/services/sessions";
+import {
+  createQuestion,
+  getSessionDetails,
+  voteQuestion,
+} from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User } from "lucide-react";
+import { ThumbsUp, User, Share2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { WithAuth } from "@/hoc/withAuth";
+import GoBack from "@/components/goBack";
+import { useToast } from "@/hooks/use-toast";
+import { onValue, ref, DatabaseReference, off } from "firebase/database";
+import { firebaseDatabase } from "@/configs/firebaseconfig";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
 
 interface Session {
   sessionCode: string;
@@ -20,12 +31,16 @@ interface Session {
       id: string;
       text: string;
       createdBy: string;
-      votes: number;
+      votes: {
+        [key: string]: boolean;
+      };
     };
   };
 }
 
-export default function DetalhesSessao() {
+function SessionDetails() {
+  const { user } = useAuth();
+  const userId = user?.uid;
   const router = useRouter();
   const params = useParams();
   const sessionId = Array.isArray(params?.sessionId)
@@ -33,13 +48,93 @@ export default function DetalhesSessao() {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newQuestion, setNewQuestion] = useState("");
+  const [showShareInfo, setShowShareInfo] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
+  const sortedQuestions = useMemo(() => {
+    if (session?.questions) {
+      return Object.values(session.questions).sort((a, b) => {
+        const votesA = a.votes ? Object.keys(a.votes).length : 0;
+        const votesB = b.votes ? Object.keys(b.votes).length : 0;
+        return votesB - votesA;
+      });
+    }
+    return [];
+  }, [session?.questions]);
+
+  const handleSubmitQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await createQuestion(sessionId, newQuestion);
+
+      toast({
+        title: "Sessão criada com sucesso",
+        description: `Pergunta criada com sucesso`,
+      });
+    } catch (error) {
+      console.error("Erro ao adicionar uma pergunta", error);
+      toast({
+        title: "Erro",
+        description: `Falha ao criar a pergunta. Por favor, tente novamente`,
+        variant: "destructive",
+      });
+    } finally {
+      setNewQuestion("");
+      setSubmitting(false);
+    }
+  };
+
+  const handleVote = async (questionId: string) => {
+    try {
+      await voteQuestion(sessionId, questionId);
+    } catch (error) {
+      console.error("Erro ao adicionar uma pergunta", error);
+      toast({
+        title: "Erro",
+        description: `Falha ao criar a pergunta. Por favor, tente novamente`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: "Entre na minha sessão no QRious",
+        text: `Use o código ${session?.sessionCode} ou escaneie o QR code para entrar na minha sessão no QRious.`,
+        url: window.location.href,
+      });
+    } else {
+      setShowShareInfo(!showShareInfo);
+    }
+  };
+
+  let sessionRef: DatabaseReference | null = null;
   useEffect(() => {
     if (sessionId) {
-      const buscarDetalhesSessao = async () => {
+      const fetchSessionDetails = async () => {
         try {
           const sessionData = await getSessionDetails(sessionId as string);
           setSession(sessionData);
+
+          // Set up real-time listener for questions
+          sessionRef = ref(firebaseDatabase, `sessions/${sessionId}/questions`);
+          onValue(sessionRef, (snapshot) => {
+            const questionsData = snapshot.val();
+            if (questionsData) {
+              setSession((prevSession) => {
+                if (!prevSession) return null;
+
+                return {
+                  ...prevSession,
+                  questions: questionsData,
+                };
+              });
+            }
+          });
         } catch (error) {
           console.error("Erro ao buscar detalhes da sessão:", error);
           router.push("/home");
@@ -47,8 +142,15 @@ export default function DetalhesSessao() {
           setLoading(false);
         }
       };
-      buscarDetalhesSessao();
+      fetchSessionDetails();
     }
+
+    // Cleanup listener on unmount
+    return () => {
+      if (sessionRef) {
+        off(sessionRef);
+      }
+    };
   }, [sessionId, router]);
 
   if (loading) {
@@ -68,125 +170,173 @@ export default function DetalhesSessao() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <main className="container mx-auto px-4 pt-28 flex flex-col items-center max-w-5xl">
-        <div className="w-full">
-          {/* SECTION FAZER PERGUNTA */}
-          <section className="pb-12">
-            <Card>
-              <CardTitle className="text-xl pl-6 pt-6 font-semibold mb-4 text-[#560bad]">
-                Faça sua pergunta
-              </CardTitle>
+      <main className="container mx-auto px-4 pt-28 pb-12 max-w-5xl">
+        <GoBack />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Coluna Direita: Fazer Pergunta e Lista de Perguntas */}
+          <div className="md:col-span-2 space-y-6 order-1 md:order-2">
+            {/* Seção Fazer Pergunta */}
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-[#560bad]">
+                  Faça sua pergunta
+                </CardTitle>
+              </CardHeader>
               <CardContent>
-                <form className="space-y-4">
-                  <div>
-                    <Textarea
-                      id="sessionDescription"
-                      // value={sessionDescription}
-                      // onChange={(e) => setSessionDescription(e.target.value)}
-                      required
-                      className="border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-                    />
-                  </div>
+                <form onSubmit={handleSubmitQuestion} className="space-y-4">
+                  <Textarea
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    placeholder="Digite sua pergunta aqui..."
+                    required
+                    className="border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
+                  />
                   <Button
                     type="submit"
                     className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                    disabled={submitting}
                   >
-                    Perguntar
+                    {submitting ? "Enviando..." : "Enviar Pergunta"}
                   </Button>
                 </form>
               </CardContent>
             </Card>
-          </section>
 
-          {/* SECTION PERGUNTAS */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 text-[#560bad]">
-              Perguntas
-            </h2>
-            <div className="space-y-4">
-              {session?.questions &&
-                Object.values(session.questions).map((question) => (
-                  <Card
-                    key={question.id}
-                    className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
-                  >
-                    <CardContent className="p-4">
-                      <p className="text-lg mb-2 text-gray-800">
-                        {question.text}
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>By: {question.createdBy}</span>
-                        <div className="flex items-center">
-                          <ThumbsUp className="w-4 h-4 mr-1 text-[#560bad]" />
-                          <span>{question.votes || 0}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-          </section>
-          <section className="flex flex-col md:flex-row md:justify-between gap-12 mb-10 pt-20">
+            {/* Seção Lista de Perguntas */}
             <Card className="bg-white shadow-lg">
-              <CardHeader className="text-black">
-                <CardTitle className="text-2xl font-bold">
-                  {session?.title}
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-[#560bad]">
+                  Perguntas
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">{session?.description}</p>
+                <motion.div layout className="space-y-4">
+                  <AnimatePresence>
+                    {sortedQuestions.length > 0 ? (
+                      sortedQuestions.map((question, index) => (
+                        <motion.div
+                          key={question.id}
+                          layoutId={question.id}
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 20 }}
+                          transition={{
+                            duration: 0.5,
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 30,
+                          }}
+                          style={{
+                            zIndex: sortedQuestions.length - index,
+                          }}
+                        >
+                          <Link
+                            href={`/sessions/${sessionId}/questions/${question.id}`}
+                          >
+                            <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300">
+                              <CardContent className="p-4">
+                                <p className="text-lg mb-2 text-gray-800">
+                                  {question.text}
+                                </p>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 space-y-2 sm:space-y-0">
+                                  <span className="flex items-center">
+                                    <User className="w-4 h-4 mr-1 flex-shrink-0" />
+                                    <span className="truncate max-w-[200px]">
+                                      {question.createdBy}
+                                    </span>
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`flex items-center space-x-1 ${
+                                      question.votes &&
+                                      userId &&
+                                      question.votes[userId]
+                                        ? "bg-[#9e49ff] text-white"
+                                        : "text-[#560bad] hover:bg-[#560bad] hover:text-white"
+                                    } transition-colors duration-300`}
+                                    onClick={() => handleVote(question.id)}
+                                  >
+                                    <ThumbsUp className="w-4 h-4" />
+                                    <span>
+                                      {question.votes
+                                        ? Object.keys(question.votes).length
+                                        : 0}
+                                    </span>
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <Card className="bg-gray-50 shadow-sm">
+                          <CardContent className="p-4">
+                            <p className="text-lg text-gray-600 text-center">
+                              Ainda não há perguntas. <br /> Seja o primeiro a
+                              perguntar!
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </CardContent>
-
-              {/* CARD QRCODE */}
             </Card>
-            <Card className="bg-white shadow-lg p-8 md:p-2 w-full md:w-52 justify-self-center flex flex-col items-center justify-center">
-              <CardContent className="space-y-2 flex flex-col items-center justify-center w-full h-full">
-                <div className="flex flex-col items-center justify-center space-y-4">
+          </div>
+
+          {/* Coluna Esquerda: Informações da Sessão e QR Code */}
+          <div className="md:col-span-1 space-y-6 order-2 md:order-1">
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl text-center font-bold text-[#560bad]">
+                  {session.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center space-y-4">
                   {session.qrcode ? (
-                    <div className="p-0 border-2 border-gray-300 rounded-lg shadow-lg">
+                    <div className="p-2 border-2 border-gray-300 rounded-lg shadow-lg">
                       <img
                         src={session.qrcode}
-                        alt="QR Code da Sessão"
-                        className="mx-auto w-full h-full"
+                        alt="Session QR Code"
+                        className="w-full h-auto"
                       />
                     </div>
                   ) : (
-                    <p className="text-red-500">QR Code não disponível</p>
+                    <p className="text-red-500">QR Code not available</p>
                   )}
                   <p className="text-base text-gray-800 font-semibold text-center bg-gray-200 px-6 py-2 rounded-md shadow-md">
+                    Code:{" "}
                     <span className="text-lg text-[#560bad] font-bold">
                       {session.sessionCode}
                     </span>
                   </p>
-                </div>
-                <div className="flex justify-center space-x-4">
                   <Button
-                    className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: "Entre na minha sessão no QRious",
-                          text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
-                          url: window.location.href,
-                        });
-                      } else {
-                        alert(
-                          "Compartilhamento não é suportado nesse navegador."
-                        );
-                      }
-                    }}
+                    className="bg-[#560bad] hover:bg-[#3a0ca3] text-white w-full"
+                    onClick={handleShare}
                   >
-                    Compartilhar
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Session
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          </section>
+          </div>
         </div>
       </main>
     </div>
   );
 }
+
+export default WithAuth(SessionDetails);

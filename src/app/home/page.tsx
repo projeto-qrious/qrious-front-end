@@ -2,7 +2,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { createSession, fetchUserSessions } from "@/services/sessions"; // Função que busca as sessões do usuário
+import {
+  createSession,
+  fetchSessionsBySpeaker,
+  fetchUserSessions,
+} from "@/services/sessions"; // Função que busca as sessões do usuário
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +31,7 @@ function Home() {
   const [sessionDescription, setSessionDescription] = useState("");
   const [newSession, setNewSession] = useState<Session | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [createdSessions, setCreatedSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
   const { toast } = useToast();
 
@@ -53,7 +58,7 @@ function Home() {
     }
   };
 
-  // Função para buscar as sessões que o usuário já entrou
+  // Função para buscar as sessões que o usuário já entrou e já criou
   useEffect(() => {
     const loadSessions = async () => {
       setLoading(true);
@@ -61,6 +66,12 @@ function Home() {
         if (user?.uid) {
           const userSessions = await fetchUserSessions(user.uid);
           setSessions(userSessions);
+
+          // Se o usuário for SPEAKER, também buscar as sessões que ele criou
+          if (role === "SPEAKER") {
+            const createdSessions = await fetchSessionsBySpeaker();
+            setCreatedSessions(createdSessions);
+          }
         }
       } catch (error) {
         toast({
@@ -69,12 +80,12 @@ function Home() {
           variant: "destructive",
         });
       } finally {
-        setLoading(false); // Carregamento concluído
+        setLoading(false);
       }
     };
 
     loadSessions();
-  }, [user?.uid, toast]);
+  }, [user?.uid, role, toast]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -89,11 +100,12 @@ function Home() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Link href="/join-session">
-                <Button className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white">
-                  Entrar na Sessão
-                </Button>
-              </Link>
+              <Button
+                onClick={() => router.push("/join-session")}
+                className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+              >
+                Entrar na Sessão
+              </Button>
             </CardContent>
           </Card>
 
@@ -151,7 +163,7 @@ function Home() {
                     </p>
                     <Button
                       onClick={() =>
-                        router.push(`/sessions/${newSession.sessionId}/details`)
+                        router.push(`/sessions/${newSession.sessionId}/share`)
                       }
                       className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                     >
@@ -164,9 +176,63 @@ function Home() {
           )}
         </div>
 
+        <div className="mt-12 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Sessões criadas</h2>
+          <div className="grid gap-3">
+            {loading ? (
+              // Skeleton loader enquanto as sessões são carregadas
+              Array.from({ length: 4 }).map((_, index) => (
+                <Card
+                  key={index}
+                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-10 w-1/3 mt-4" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : createdSessions.length > 0 ? (
+              createdSessions.map((session) => (
+                <Card
+                  key={session.sessionId}
+                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg">{session.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 h-[3em] line-clamp-2 overflow-hidden text-ellipsis mb-1">
+                      {session.description}
+                    </p>
+                    <Button
+                      onClick={() =>
+                        router.push(`/sessions/${session.sessionId}/details`)
+                      }
+                      className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                    >
+                      Ver detalhes
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p className="text-gray-600">
+                Você ainda não criou nenhuma sessão.
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Seção para exibir as sessões que o usuário já entrou */}
         <div className="mt-12 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Minhas Sessões</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Sessões que você participa
+          </h2>
           <div className="grid gap-3">
             {loading ? (
               // Skeleton loader enquanto as sessões são carregadas
@@ -204,7 +270,7 @@ function Home() {
                       }
                       className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                     >
-                      Ver Detalhes da Sessão
+                      Entrar
                     </Button>
                   </CardContent>
                 </Card>

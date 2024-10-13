@@ -38,13 +38,16 @@ export default function SignUp() {
     try {
       await registerUser(email, password, username);
       await loginUser(email, password);
-      toast({ title: "Success", description: "Account created successfully!" });
+      toast({
+        title: "Sucesso",
+        description: "Conta criada com sucesso!",
+      });
       router.push("/home");
     } catch (error) {
-      console.error("Error registering: ", error);
+      console.error("Erro ao registrar: ", error);
       toast({
-        title: "Error",
-        description: "Failed to create account. Please try again.",
+        title: "Erro",
+        description: "Falha ao criar a conta. Por favor, tente novamente.",
         variant: "destructive",
       });
     }
@@ -63,7 +66,7 @@ export default function SignUp() {
         <Card className="bg-white shadow-lg">
           <CardHeader className="text-black">
             <CardTitle className="text-2xl font-semibold text-center">
-              Create an Account
+              Criar Conta
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -73,7 +76,7 @@ export default function SignUp() {
                   htmlFor="username"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Username
+                  Nome de usuário
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -84,7 +87,7 @@ export default function SignUp() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-                    placeholder="Enter your username"
+                    placeholder="Digite seu nome de usuário"
                     required
                   />
                 </div>
@@ -106,7 +109,7 @@ export default function SignUp() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-                    placeholder="Enter your email"
+                    placeholder="Digite seu email"
                     required
                   />
                 </div>
@@ -116,7 +119,7 @@ export default function SignUp() {
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Password
+                  Senha
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -128,7 +131,7 @@ export default function SignUp() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-                    placeholder="Enter your password"
+                    placeholder="Digite sua senha"
                     required
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -150,7 +153,7 @@ export default function SignUp() {
                 type="submit"
                 className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
               >
-                Sign Up
+                Criar Conta
               </Button>
             </form>
             <div className="mt-6">
@@ -160,7 +163,7 @@ export default function SignUp() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-gray-500">
-                    Or continue with
+                    Ou continue com
                   </span>
                 </div>
               </div>
@@ -184,12 +187,12 @@ export default function SignUp() {
               </div>
             </div>
             <p className="mt-6 text-center text-sm text-gray-600">
-              Already have an account?{" "}
+              Já tem uma conta?{" "}
               <Link
                 href="/signin"
                 className="font-medium text-[#560bad] hover:text-[#3a0ca3]"
               >
-                Sign in
+                Entrar
               </Link>
             </p>
           </CardContent>

@@ -21,8 +21,8 @@ const Header: React.FC = () => {
 
   return (
     <header className="fixed w-full bg-white shadow-md z-50">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <div className="container mx-auto px-4 h-20 flex items-center justify-center">
+        {/* <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
               <Menu className="h-8 w-8 text-black" />
@@ -59,7 +59,7 @@ const Header: React.FC = () => {
               </Button>
             </div>
           </SheetContent>
-        </Sheet>
+        </Sheet> */}
         <h1 className="text-3xl font-black bg-gradient-to-r from-[#560bad] to-[#3a0ca3] text-transparent bg-clip-text">
           QRious
         </h1>

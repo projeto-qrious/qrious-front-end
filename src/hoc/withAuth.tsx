@@ -1,8 +1,9 @@
+import Loading from "@/components/Loading";
 import { useAuth } from "../contexts/AuthContext";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export function withAuth(Component: React.ComponentType) {
+export function WithAuth(Component: React.ComponentType) {
   return function AuthenticatedComponent(props: any) {
     const { user, loading } = useAuth();
     const router = useRouter();
@@ -14,7 +15,7 @@ export function withAuth(Component: React.ComponentType) {
     }, [user, loading]);
 
     if (loading) {
-      return <div>Loading...</div>;
+      return <Loading />;
     }
 
     return user ? <Component {...props} /> : null;
