@@ -1,3 +1,4 @@
+import Loading from "@/components/Loading";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
@@ -19,13 +20,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       if (!user) {
         router.push("/signin");
       } else if (requiredRole && role !== requiredRole) {
-        router.push("/unauthorized"); // A page to show unauthorized access
+        router.push("/unauthorized");
       }
     }
-  }, [user, loading, role]);
+  }, [user, loading, role, requiredRole, router]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (

@@ -1,7 +1,6 @@
 import { auth } from "../configs/firebaseconfig";
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
   FacebookAuthProvider,
@@ -18,39 +17,23 @@ export async function registerUser(
   try {
     const payload = { email, password, displayName, phoneNumber };
 
-    // Remove o campo `phoneNumber` se não for fornecido
     if (!phoneNumber) {
       delete payload.phoneNumber;
     }
 
-    const response = await api.post(`/auth/register`, payload);
-
-    return response.data;
+    await api.post("/auth/register", payload);
+    await loginUser(email, password);
   } catch (error) {
-    console.error("Erro ao registrar o usuário. ", error);
+    console.error("Erro ao registrar o usuário:", error);
     throw error;
   }
 }
 
 export async function loginUser(email: string, password: string) {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-
-    const idToken = await user.getIdToken();
-    localStorage.setItem("token", idToken);
-
-    const response = await api.post(`/auth/verify-token`, {
-      idToken,
-    });
-
-    return response.data;
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
-    console.error("Erro ao fazer login. ", error);
+    console.error("Erro ao fazer login:", error);
     throw error;
   }
 }
@@ -58,12 +41,11 @@ export async function loginUser(email: string, password: string) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   try {
-    const result = await signInWithPopup(auth, provider);
-    const token = await result.user.getIdToken();
-    console.log("Google ID Token:", token);
-    alert("Login com Google bem-sucedido! Token JWT obtido: " + token);
-  } catch (error: any) {
-    console.error("Erro no login com Google: " + error.message);
+    await signInWithPopup(auth, provider);
+    // O estado de autenticação será atualizado pelo AuthContext
+  } catch (error) {
+    console.error("Erro no login com Google:", error);
+    throw error;
   }
 }
 

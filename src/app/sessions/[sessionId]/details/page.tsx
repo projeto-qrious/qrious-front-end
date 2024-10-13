@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/hoc/protectedRoutes";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share } from "lucide-react";
 
 // Definindo a interface para tipar a sessão
 interface Session {
@@ -105,6 +105,13 @@ const DetalhesSessao = () => {
             {/* Botões de Ação */}
             <div className="flex justify-center space-x-4">
               <Button
+                className="bg-black hover:bg-gray-600 text-white"
+                onClick={() => router.push("/home")}
+              >
+                <ArrowLeft className="mr-2 mt-0.5 h-4 w-4" />
+                Página Inicial
+              </Button>
+              <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                 onClick={() => {
                   if (navigator.share) {
@@ -118,14 +125,7 @@ const DetalhesSessao = () => {
                   }
                 }}
               >
-                Compartilhar
-              </Button>
-              <Button
-                className="bg-black hover:bg-gray-600 text-white"
-                onClick={() => router.push("/home")}
-              >
-                <ArrowLeft className="mr-2 mt-0.5 h-4 w-4" />
-                Página Inicial
+                <Share className="mr-2 mt-0.5 h-4 w-4" /> Compartilhar
               </Button>
             </div>
           </CardContent>

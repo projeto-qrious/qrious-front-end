@@ -12,6 +12,7 @@ import ProtectedRoute from "@/hoc/protectedRoutes";
 import { QrCode, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 
 interface Session {
   sessionId: string;
@@ -26,6 +27,7 @@ function Home() {
   const [sessionDescription, setSessionDescription] = useState("");
   const [newSession, setNewSession] = useState<Session | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
   const { toast } = useToast();
 
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -54,6 +56,7 @@ function Home() {
   // Função para buscar as sessões que o usuário já entrou
   useEffect(() => {
     const loadSessions = async () => {
+      setLoading(true);
       try {
         if (user?.uid) {
           const userSessions = await fetchUserSessions(user.uid);
@@ -65,6 +68,8 @@ function Home() {
           description: `Falha ao carregar as sessões. ${error}`,
           variant: "destructive",
         });
+      } finally {
+        setLoading(false); // Carregamento concluído
       }
     };
 
@@ -160,10 +165,27 @@ function Home() {
         </div>
 
         {/* Seção para exibir as sessões que o usuário já entrou */}
-        <div className="mt-12">
+        <div className="mt-12 mb-6">
           <h2 className="text-2xl font-bold mb-4">Minhas Sessões</h2>
-          <div className="grid gap-6">
-            {sessions.length > 0 ? (
+          <div className="grid gap-3">
+            {loading ? (
+              // Skeleton loader enquanto as sessões são carregadas
+              Array.from({ length: 4 }).map((_, index) => (
+                <Card
+                  key={index}
+                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-10 w-1/3 mt-4" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : sessions.length > 0 ? (
               sessions.map((session) => (
                 <Card
                   key={session.sessionId}

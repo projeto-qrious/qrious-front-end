@@ -1,24 +1,22 @@
 import axios from "axios";
+import { auth } from "../configs/firebaseconfig";
 
-const API_URL = "http://localhost:3001";
+const API_URL = "http://192.168.1.188:3001";
 
 const api = axios.create({
   baseURL: API_URL,
 });
 
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
+  async (config) => {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
       config.headers["Authorization"] = `Bearer ${token}`;
     }
-
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;

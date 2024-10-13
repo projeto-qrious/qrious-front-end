@@ -1,14 +1,14 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../configs/firebaseconfig";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { getDatabase, ref, get } from "firebase/database";
+import { User, onIdTokenChanged } from "firebase/auth";
+import { get, getDatabase, ref } from "firebase/database";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   role: string | null;
+  token: string | null;
   logout: () => Promise<void>;
 }
 
@@ -16,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   role: null,
+  token: null,
   logout: async () => {},
 });
 
@@ -24,17 +25,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        const token = await firebaseUser.getIdToken();
-        localStorage.setItem("token", token);
+        const idToken = await firebaseUser.getIdToken();
+        setToken(idToken);
 
-        // Fetch user role from Realtime Database
         const db = getDatabase();
         const roleSnapshot = await get(
           ref(db, `users/${firebaseUser.uid}/role`)
@@ -45,7 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setRole(role);
       } else {
         setUser(null);
-        localStorage.removeItem("token");
+        setToken(null);
+        setRole(null);
       }
       setLoading(false);
     });
@@ -56,16 +57,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     await auth.signOut();
     setUser(null);
-    localStorage.removeItem("token");
-    router.push("/signin"); // Redirect to signin page after logout
+    setToken(null);
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, role }}>
+    <AuthContext.Provider value={{ user, loading, role, token, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => useContext(AuthContext);
