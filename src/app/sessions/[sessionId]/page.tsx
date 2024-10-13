@@ -182,7 +182,7 @@ function SessionDetails() {
             <Card className="bg-white shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-[#560bad]">
-                  Faça sua pergunta
+                  Faça sua pergunta ou curta as perguntas abaixo
                 </CardTitle>
               </CardHeader>
               <CardContent>

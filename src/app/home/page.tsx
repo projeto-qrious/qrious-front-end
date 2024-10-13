@@ -176,57 +176,59 @@ function Home() {
           )}
         </div>
 
-        <div className="mt-12 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Sessões criadas</h2>
-          <div className="grid gap-3">
-            {loading ? (
-              // Skeleton loader enquanto as sessões são carregadas
-              Array.from({ length: 4 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
-                >
-                  <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-5/6" />
-                    <Skeleton className="h-10 w-1/3 mt-4" />
-                  </CardContent>
-                </Card>
-              ))
-            ) : createdSessions.length > 0 ? (
-              createdSessions.map((session) => (
-                <Card
-                  key={session.sessionId}
-                  className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
-                >
-                  <CardHeader>
-                    <CardTitle className="text-lg">{session.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 h-[3em] line-clamp-2 overflow-hidden text-ellipsis mb-1">
-                      {session.description}
-                    </p>
-                    <Button
-                      onClick={() =>
-                        router.push(`/sessions/${session.sessionId}/details`)
-                      }
-                      className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
-                    >
-                      Ver detalhes
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <p className="text-gray-600">
-                Você ainda não criou nenhuma sessão.
-              </p>
-            )}
+        {role === "SPEAKER" && (
+          <div className="mt-12 mb-6">
+            <h2 className="text-2xl font-bold mb-4">Sessões criadas</h2>
+            <div className="grid gap-3">
+              {loading ? (
+                // Skeleton loader enquanto as sessões são carregadas
+                Array.from({ length: 4 }).map((_, index) => (
+                  <Card
+                    key={index}
+                    className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                  >
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-5/6" />
+                      <Skeleton className="h-10 w-1/3 mt-4" />
+                    </CardContent>
+                  </Card>
+                ))
+              ) : createdSessions.length > 0 ? (
+                createdSessions.map((session) => (
+                  <Card
+                    key={session.sessionId}
+                    className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300"
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg">{session.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 h-[3em] line-clamp-2 overflow-hidden text-ellipsis mb-1">
+                        {session.description}
+                      </p>
+                      <Button
+                        onClick={() =>
+                          router.push(`/sessions/${session.sessionId}/share`)
+                        }
+                        className="mt-2 bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                      >
+                        Ver detalhes
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-gray-600">
+                  Você ainda não criou nenhuma sessão.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Seção para exibir as sessões que o usuário já entrou */}
         <div className="mt-12 mb-6">

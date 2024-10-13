@@ -2,47 +2,42 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  registerUser,
-  loginUser,
-  signInWithGoogle,
-  signInWithFacebook,
-} from "@/services/auth";
+import { registerUser, loginUser } from "@/services/auth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
-import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get("redirect") || "/home";
+
   useEffect(() => {
     if (!loading && user) {
-      router.push("/home");
+      router.push(redirectTo); // Redireciona para a página original
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectTo]);
 
-  const onSubmit = async (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     try {
       await registerUser(email, password, username);
       await loginUser(email, password);
-      toast({
-        title: "Sucesso",
-        description: "Conta criada com sucesso!",
-      });
-      router.push("/home");
+      toast({ title: "Sucesso", description: "Conta criada com sucesso!" });
+      router.push(redirectTo);
     } catch (error) {
       console.error("Erro ao registrar: ", error);
       toast({
@@ -50,6 +45,8 @@ export default function SignUp() {
         description: "Falha ao criar a conta. Por favor, tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,6 +86,7 @@ export default function SignUp() {
                     className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
                     placeholder="Digite seu nome de usuário"
                     required
+                    disabled={isLoading} // Desabilita o campo durante o carregamento
                   />
                 </div>
               </div>
@@ -111,6 +109,7 @@ export default function SignUp() {
                     className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
                     placeholder="Digite seu email"
                     required
+                    disabled={isLoading} // Desabilita o campo durante o carregamento
                   />
                 </div>
               </div>
@@ -133,12 +132,14 @@ export default function SignUp() {
                     className="pl-10 pr-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
                     placeholder="Digite sua senha"
                     required
+                    disabled={isLoading} // Desabilita o campo durante o carregamento
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
                       className="text-gray-400 hover:text-gray-500 focus:outline-none focus:text-gray-500"
+                      disabled={isLoading} // Desabilita o botão durante o carregamento
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" aria-hidden="true" />
@@ -152,8 +153,9 @@ export default function SignUp() {
               <Button
                 type="submit"
                 className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                disabled={isLoading} // Desabilita o botão durante o carregamento
               >
-                Criar Conta
+                {isLoading ? "Criando Conta..." : "Criar Conta"}
               </Button>
             </form>
             <div className="mt-6">
@@ -170,30 +172,30 @@ export default function SignUp() {
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  onClick={signInWithGoogle}
+                  onClick={() => {}}
                   className="border-gray-300 hover:bg-gray-50"
+                  disabled={isLoading} // Desabilita os botões de login social durante o carregamento
                 >
-                  <Google className="h-5 w-5 mr-2 text-[#560bad]" />
                   Google
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={signInWithFacebook}
+                  onClick={() => {}}
                   className="border-gray-300 hover:bg-gray-50"
+                  disabled={isLoading}
                 >
-                  <Facebook className="h-5 w-5 mr-2 text-[#3a0ca3]" />
                   Facebook
                 </Button>
               </div>
             </div>
             <p className="mt-6 text-center text-sm text-gray-600">
               Já tem uma conta?{" "}
-              <Link
+              <a
                 href="/signin"
                 className="font-medium text-[#560bad] hover:text-[#3a0ca3]"
               >
                 Entrar
-              </Link>
+              </a>
             </p>
           </CardContent>
         </Card>

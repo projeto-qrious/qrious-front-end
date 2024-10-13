@@ -21,7 +21,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="fixed w-full bg-white shadow-md z-50">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-center">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
@@ -63,6 +63,13 @@ const Header: React.FC = () => {
         <h1 className="text-3xl font-black bg-gradient-to-r from-[#560bad] to-[#3a0ca3] text-transparent bg-clip-text">
           QRious
         </h1>
+        <Button
+          className="bg-transparent text-red-500 hover:bg-gray-600 hover:text-white"
+          onClick={logout}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </div>
     </header>
   );

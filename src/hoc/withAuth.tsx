@@ -10,7 +10,8 @@ export function WithAuth(Component: React.ComponentType) {
 
     useEffect(() => {
       if (!loading && !user) {
-        router.push("/signin");
+        const currentPath = window.location.pathname;
+        router.push(`/signin?redirect=${encodeURIComponent(currentPath)}`);
       }
     }, [user, loading]);
 

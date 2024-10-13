@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,22 +21,27 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Mova para dentro da função
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get("redirect") || "/home";
+
   useEffect(() => {
     if (!loading && user) {
-      router.push("/home");
+      router.push(redirectTo);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectTo]);
 
-  const onSubmit = async (event: React.FormEvent) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
     try {
       await loginUser(email, password);
       toast({ title: "Sucesso", description: "Login bem-sucedido!" });
-      history.back();
+      router.push(redirectTo);
     } catch (error) {
       console.error("Erro ao fazer login: ", error);
       toast({
@@ -44,6 +49,8 @@ export default function SignIn() {
         description: "Falha ao fazer login. Por favor, tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,8 +137,9 @@ export default function SignIn() {
               <Button
                 type="submit"
                 className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                disabled={isLoading}
               >
-                Entrar
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
             <div className="mt-6">
@@ -150,6 +158,7 @@ export default function SignIn() {
                   variant="outline"
                   onClick={signInWithGoogle}
                   className="border-gray-300 hover:bg-gray-50"
+                  disabled={isLoading}
                 >
                   <Google className="h-5 w-5 mr-2 text-[#560bad]" />
                   Google
@@ -158,6 +167,7 @@ export default function SignIn() {
                   variant="outline"
                   onClick={signInWithFacebook}
                   className="border-gray-300 hover:bg-gray-50"
+                  disabled={isLoading}
                 >
                   <Facebook className="h-5 w-5 mr-2 text-[#3a0ca3]" />
                   Facebook

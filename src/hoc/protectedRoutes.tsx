@@ -18,7 +18,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push("/signin");
+        const currentPath = window.location.pathname;
+        router.push(`/signin?redirect=${encodeURIComponent(currentPath)}`);
       } else if (requiredRole && role !== requiredRole) {
         router.push("/unauthorized");
       }
