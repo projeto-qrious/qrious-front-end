@@ -71,7 +71,7 @@ function SessionDetails() {
       await createQuestion(sessionId, newQuestion);
 
       toast({
-        title: "Sessão criada com sucesso",
+        title: "Sucesso!",
         description: `Pergunta criada com sucesso`,
       });
     } catch (error) {
