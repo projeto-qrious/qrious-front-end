@@ -1,5 +1,5 @@
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Button from "../../components/CustomButton";
 
 export default function Splash() {
   return (
@@ -28,16 +28,14 @@ export default function Splash() {
 
         <div className="pt-8 flex flex-col gap-4 lg:gap-8 lg:items-center lg:pt-14">
           <Link href="/signin">
-            <Button
-              label="Entrar"
-              className="font-bold lg:text-lg lg:w-[500px]"
-            />
+            <Button className="font-bold lg:text-lg lg:w-[500px]">
+              Entrar
+            </Button>
           </Link>
           <Link href="/signup">
-            <Button
-              label="Criar Conta"
-              className=" bg-white border border-black text-[#000] font-bold lg:text-lg lg:w-[500px]"
-            />
+            <Button className=" bg-white border border-black text-[#000] font-bold lg:text-lg lg:w-[500px]">
+              Criar Conta
+            </Button>
           </Link>
         </div>
       </div>

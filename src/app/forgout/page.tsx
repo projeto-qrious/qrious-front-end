@@ -3,9 +3,9 @@
 import { useState } from "react";
 import CustomInput from "../../components/CustomInput";
 import { MdEmail } from "react-icons/md";
-import Button from "../../components/CustomButton";
-import Goback from "../../components/GobackIcon";
 import Link from "next/link";
+import GoBack from "@/components/goBack";
+import { Button } from "@/components/ui/button";
 
 export default function Forgout() {
   const [email, setEmail] = useState("");
@@ -17,14 +17,14 @@ export default function Forgout() {
 
   return (
     <div className="p-6 md:p-0 md:flex md:flex-row">
-      <section className="md:h-screen md:w-full md:flex md:items-center md:justify-center md:bg-[#0094C611]">
+      <section className="md:h-screen md:w-full md:flex md:items-center md:justify-center md:bg-[#560bad]">
         <div className="absolute left-6 top-8">
           <Link href="/signin">
-            <Goback />
+            <GoBack />
           </Link>
         </div>
         <h1
-          className="text-center font-bold text-4xl pt-4
+          className="text-center text-[#fff] font-bold text-4xl pt-4
           md:text-5xl
           lg:text-8xl
       "
@@ -52,7 +52,9 @@ export default function Forgout() {
             />
           </div>
 
-          <Button label="Entrar" className="my-8" />
+          <Button className="my-8 w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white">
+            Recuperar
+          </Button>
         </form>
       </section>
     </div>
