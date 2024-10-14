@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { registerUser, loginUser } from "@/services/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +21,7 @@ export default function SignUp() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/home";
 
   useEffect(() => {
@@ -191,7 +191,7 @@ export default function SignUp() {
             <p className="mt-6 text-center text-sm text-gray-600">
               Já tem uma conta?{" "}
               <a
-                href="/signin"
+                href={`/signin?redirect=${encodeURIComponent(redirectTo)}`}
                 className="font-medium text-[#560bad] hover:text-[#3a0ca3]"
               >
                 Entrar

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -26,7 +26,7 @@ export default function SignIn() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const searchParams = new URLSearchParams(window.location.search);
+  const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/home";
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function SignIn() {
             <p className="mt-6 text-center text-sm text-gray-600">
               Não tem uma conta?{" "}
               <Link
-                href="/signup"
+                href={`/signup?redirect=${encodeURIComponent(redirectTo)}`}
                 className="font-medium text-[#560bad] hover:text-[#3a0ca3]"
               >
                 Cadastre-se

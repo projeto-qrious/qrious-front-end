@@ -8,7 +8,7 @@ const GoBack: FC = () => {
 
   return (
     <Button
-      onClick={() => router.back()}
+      onClick={() => router.push("/home")}
       className="bg-transparent hover:bg-[#560bad] text-black hover:text-white  mb-6"
     >
       <ArrowLeft className="mr-2 md:mt-0.5 h-4 w-4" /> Voltar
