@@ -130,7 +130,7 @@ export default function SignIn() {
                 </div>
               </div>
               <div className="flex items-center justify-end">
-                <Link href="/forgot-password" className="text-sm text-black">
+                <Link href="/forgout" className="text-sm text-black">
                   Esqueceu sua senha?
                 </Link>
               </div>

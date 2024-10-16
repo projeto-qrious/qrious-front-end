@@ -71,7 +71,7 @@ function SessionDetails() {
       await createQuestion(sessionId, newQuestion);
 
       toast({
-        title: "Sessão criada com sucesso",
+        title: "Sucesso!",
         description: `Pergunta criada com sucesso`,
       });
     } catch (error) {
@@ -213,7 +213,10 @@ function SessionDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <motion.div layout className="space-y-4">
+                <motion.div
+                  layout
+                  className="space-y-4 max-h-[400px] overflow-y-auto"
+                >
                   <AnimatePresence>
                     {sortedQuestions.length > 0 ? (
                       sortedQuestions.map((question, index) => (
@@ -238,7 +241,7 @@ function SessionDetails() {
                           >
                             <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300">
                               <CardContent className="p-4">
-                                <p className="text-lg mb-2 text-gray-800">
+                                <p className="text-lg mb-2 text-gray-800 line-clamp-3 break-words">
                                   {question.text}
                                 </p>
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 space-y-2 sm:space-y-0">
@@ -258,7 +261,11 @@ function SessionDetails() {
                                         ? "bg-[#9e49ff] text-white"
                                         : "text-[#560bad] hover:bg-[#560bad] hover:text-white"
                                     } transition-colors duration-300`}
-                                    onClick={() => handleVote(question.id)}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleVote(question.id);
+                                    }}
                                   >
                                     <ThumbsUp className="w-4 h-4" />
                                     <span>
@@ -324,10 +331,22 @@ function SessionDetails() {
                   </p>
                   <Button
                     className="bg-[#560bad] hover:bg-[#3a0ca3] text-white w-full"
-                    onClick={handleShare}
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: "Entre na minha sessão no QRious",
+                          text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
+                          url: window.location.href,
+                        });
+                      } else {
+                        alert(
+                          "Compartilhamento não é suportado nesse navegador."
+                        );
+                      }
+                    }}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
-                    Share Session
+                    Compartilhar Sessão
                   </Button>
                 </div>
               </CardContent>

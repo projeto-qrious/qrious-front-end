@@ -9,13 +9,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/hoc/protectedRoutes";
 import { ArrowLeft, Share } from "lucide-react";
 
-// Definindo a interface para tipar a sessão
 interface Session {
   sessionCode: string;
   qrcode: string;
   title: string;
   description: string;
-  // Outros campos, se houver
 }
 
 const DetalhesSessao = () => {
@@ -26,12 +24,12 @@ const DetalhesSessao = () => {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  // Remova 'user' se não for necessário
+
   const { user } = useAuth();
 
   useEffect(() => {
     if (sessionId) {
-      const buscarDetalhesSessao = async () => {
+      const fetchSessionDetails = async () => {
         try {
           const sessionData = await getSessionDetails(sessionId as string);
           setSession(sessionData);
@@ -42,7 +40,7 @@ const DetalhesSessao = () => {
           setLoading(false);
         }
       };
-      buscarDetalhesSessao();
+      fetchSessionDetails();
     }
   }, [sessionId, router]);
 

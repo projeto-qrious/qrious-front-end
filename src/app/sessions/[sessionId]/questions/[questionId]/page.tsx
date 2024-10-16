@@ -1,15 +1,13 @@
 "use client";
-
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { fetchQuestionDetails, voteQuestion } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, User, Share2 } from "lucide-react";
+import { ThumbsUp, User, Share2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import GoBack from "@/components/goBack";
 import { WithAuth } from "@/hoc/withAuth";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -30,6 +28,7 @@ function QuestionDetails() {
   const router = useRouter();
   const [question, setQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
+  const [voting, setVoting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,8 +69,24 @@ function QuestionDetails() {
   }
 
   const handleVote = async () => {
+    setVoting(true);
     try {
       await voteQuestion(sessionIdStr, question.id);
+
+      setQuestion((prevQuestion) => {
+        if (!prevQuestion) return null;
+
+        const updatedVotes = { ...prevQuestion.votes };
+        if (userId) {
+          if (updatedVotes[userId]) {
+            delete updatedVotes[userId];
+          } else {
+            updatedVotes[userId] = true;
+          }
+        }
+
+        return { ...prevQuestion, votes: updatedVotes };
+      });
     } catch (error) {
       console.error("Erro ao votar na pergunta", error);
       toast({
@@ -79,6 +94,8 @@ function QuestionDetails() {
         description: `Falha ao votar. Por favor, tente novamente`,
         variant: "destructive",
       });
+    } finally {
+      setVoting(false);
     }
   };
 
@@ -102,7 +119,12 @@ function QuestionDetails() {
       <Header />
 
       <main className="container mx-auto px-4 pt-28 pb-12 max-w-3xl">
-        <GoBack />
+        <Button
+          onClick={() => router.back()}
+          className="bg-transparent hover:bg-[#560bad] text-black hover:text-white  mb-6"
+        >
+          <ArrowLeft className="mr-2 md:mt-0.5 h-4 w-4" /> Voltar
+        </Button>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,7 +138,9 @@ function QuestionDetails() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-lg text-gray-800 mb-4">{question.text}</p>
+              <p className="text-lg text-gray-800 mb-4 break-words">
+                {question.text}
+              </p>
               <div className="flex items-center space-x-2 text-gray-500">
                 <User className="w-4 h-4" />
                 <span className="font-medium">{question.createdBy}</span>
@@ -130,6 +154,7 @@ function QuestionDetails() {
                       : "text-[#560bad] hover:bg-[#560bad] hover:text-white"
                   } transition-colors duration-300`}
                   onClick={handleVote}
+                  disabled={voting}
                 >
                   <ThumbsUp className="w-4 h-4" />
                   <span>{Object.keys(question.votes || {}).length}</span>

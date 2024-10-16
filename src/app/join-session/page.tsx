@@ -14,8 +14,8 @@ import { BrowserQRCodeReader } from "@zxing/browser";
 import { WithAuth } from "@/hoc/withAuth";
 
 const JoinSession = () => {
-  // Estado para o código da sessão e o QRCode
   const [sessionCode, setSessionCode] = useState("");
+  const [qrCode, setQrCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isScanning, setIsScanning] = useState(false);
@@ -87,10 +87,6 @@ const JoinSession = () => {
         // Acesse o método estático `listVideoInputDevices` diretamente da classe
         const videoInputDevices =
           await BrowserQRCodeReader.listVideoInputDevices();
-        console.log(
-          "Dispositivos de entrada de vídeo disponíveis: ",
-          videoInputDevices
-        );
 
         if (videoInputDevices.length === 0) {
           throw new Error("Nenhum dispositivo de câmera disponível.");
@@ -105,7 +101,14 @@ const JoinSession = () => {
           videoRef.current
         );
 
-        setSessionCode(result.getText());
+        const qrCodeText = result.getText(); // Captura o texto do QRCode (URL)
+
+        if (qrCodeText) {
+          // Redireciona diretamente para a URL do QRCode
+          router.push(qrCodeText); // Navega para a URL extraída
+        } else {
+          setError("Código QR inválido.");
+        }
       } else {
         setError("Câmera não disponível.");
       }
