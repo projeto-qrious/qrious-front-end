@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -21,13 +21,16 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Mova para dentro da função
+  const [isLoading, setIsLoading] = useState(false);
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const [redirectTo, setRedirectTo] = useState("/home"); // Mova o estado para aqui
 
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/home";
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    setRedirectTo(searchParams.get("redirect") || "/home"); // Atualize o redirecionamento aqui
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -130,7 +133,7 @@ export default function SignIn() {
                 </div>
               </div>
               <div className="flex items-center justify-end">
-                <Link href="/forgout" className="text-sm text-black">
+                <Link href="/forgot" className="text-sm text-black">
                   Esqueceu sua senha?
                 </Link>
               </div>

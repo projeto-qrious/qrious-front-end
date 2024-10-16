@@ -9,7 +9,7 @@ import {
   voteQuestion,
 } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User, Share2, X } from "lucide-react";
+import { ThumbsUp, User, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { WithAuth } from "@/hoc/withAuth";
@@ -49,7 +49,6 @@ function SessionDetails() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [newQuestion, setNewQuestion] = useState("");
-  const [showShareInfo, setShowShareInfo] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -97,18 +96,6 @@ function SessionDetails() {
         description: `Falha ao criar a pergunta. Por favor, tente novamente`,
         variant: "destructive",
       });
-    }
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "Entre na minha sessão no QRious",
-        text: `Use o código ${session?.sessionCode} ou escaneie o QR code para entrar na minha sessão no QRious.`,
-        url: window.location.href,
-      });
-    } else {
-      setShowShareInfo(!showShareInfo);
     }
   };
 

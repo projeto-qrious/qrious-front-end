@@ -7,7 +7,6 @@ import {
   fetchSessionsBySpeaker,
   fetchUserSessions,
 } from "@/services/sessions"; // Função que busca as sessões do usuário
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -159,7 +158,7 @@ function Home() {
                 {newSession && (
                   <div className="mt-4 p-4 bg-gray-100 rounded-md">
                     <p className="text-gray-800 font-semibold">
-                      Sessão "{newSession.title}" criada com sucesso!
+                      Sessão {newSession.title} criada com sucesso!
                     </p>
                     <Button
                       onClick={() =>
