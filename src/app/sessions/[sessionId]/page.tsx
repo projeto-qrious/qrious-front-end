@@ -9,7 +9,7 @@ import {
   voteQuestion,
 } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User, Share2 } from "lucide-react";
+import { ThumbsUp, User, Share2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { WithAuth } from "@/hoc/withAuth";
@@ -97,6 +97,14 @@ function SessionDetails() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleDelete = async (questionId: string) => {
+    console.log("clicou! delete", questionId);
+  };
+
+  const handleCheck = async (questionId: string) => {
+    console.log("clicou! check", questionId);
   };
 
   let sessionRef: DatabaseReference | null = null;
@@ -226,8 +234,34 @@ function SessionDetails() {
                           <Link
                             href={`/sessions/${sessionId}/questions/${question.id}`}
                           >
-                            <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300">
-                              <CardContent className="p-4">
+                            <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 relative">
+                              <CardContent className="p-4 pt-10">
+                                <div className="absolute top-2 right-2 flex space-x-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-green-600 hover:text-white hover:bg-green-600"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleCheck(question.id);
+                                    }}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-600 hover:text-white hover:bg-red-600"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleDelete(question.id);
+                                    }}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
                                 <p className="text-lg mb-2 text-gray-800 line-clamp-3 break-words">
                                   {question.text}
                                 </p>
