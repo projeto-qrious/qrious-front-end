@@ -5,7 +5,6 @@ import { getSessionDetails } from "@/services/sessions";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/hoc/protectedRoutes";
 import { ArrowLeft, Share } from "lucide-react";
 
@@ -27,7 +26,7 @@ const DetalhesSessao = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   // Remova 'user' se não for necessário
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
   useEffect(() => {
     if (sessionId) {

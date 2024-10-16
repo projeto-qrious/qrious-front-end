@@ -1,23 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Menu, X, Book, Heart, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 const Header: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { logout, user } = useAuth();
+  // const [isOpen, setIsOpen] = useState(false);
+  const { logout } = useAuth();
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  // const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
     <header className="fixed w-full bg-white shadow-md z-50">

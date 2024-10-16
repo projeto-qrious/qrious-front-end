@@ -3,8 +3,10 @@ import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export function WithAuth(Component: React.ComponentType) {
-  return function AuthenticatedComponent(props: any) {
+export function WithAuth<ComponentProps extends object>(
+  Component: React.ComponentType<ComponentProps & JSX.IntrinsicAttributes>
+) {
+  return function AuthenticatedComponent(props: ComponentProps) {
     const { user, loading } = useAuth();
     const router = useRouter();
 

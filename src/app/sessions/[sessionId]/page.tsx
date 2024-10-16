@@ -9,7 +9,7 @@ import {
   voteQuestion,
 } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User, Share2, X } from "lucide-react";
+import { ThumbsUp, User, Share2} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { WithAuth } from "@/hoc/withAuth";

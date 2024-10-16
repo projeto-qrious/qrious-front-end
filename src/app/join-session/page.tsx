@@ -47,11 +47,17 @@ const JoinSession = () => {
         sessionCode
       );
       router.push(`/sessions/${returnedSessionId}`);
-    } catch (err: any) {
-      console.error("Erro ao entrar na sessão: ", err);
-      setError(
-        "Falha ao entrar na sessão. Por favor, verifique o código fornecido."
-      );
+    } catch (err: unknown) {
+      // Usando uma verificação de tipo para garantir que seja um erro com uma mensagem
+      if (err instanceof Error) {
+        console.error("Erro ao entrar na sessão: ", err.message);
+        setError(
+          "Falha ao entrar na sessão. Por favor, verifique o código fornecido."
+        );
+      } else {
+        console.error("Erro inesperado: ", err);
+        setError("Ocorreu um erro inesperado.");
+      }
     } finally {
       setLoading(false);
     }

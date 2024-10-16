@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
-
 export default function Loading() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
