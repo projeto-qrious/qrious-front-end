@@ -1,18 +1,21 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getSessionDetails } from "@/services/sessions";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtectedRoute from "@/hoc/protectedRoutes";
-import { ArrowLeft, Share } from "lucide-react";
+import { Share } from "lucide-react";
+import GoBack from "@/components/goBack";
+import html2pdf from "html2pdf.js";
 
 interface Session {
   sessionCode: string;
   qrcode: string;
   title: string;
   description: string;
+  sessionId: string;
 }
 
 const SessionDetails = () => {
@@ -23,8 +26,6 @@ const SessionDetails = () => {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  // Remova 'user' se não for necessário
-  // const { user } = useAuth();
 
   useEffect(() => {
     if (sessionId) {
@@ -43,6 +44,41 @@ const SessionDetails = () => {
     }
   }, [sessionId, router]);
 
+  const sessionDetailsRef = useRef<HTMLDivElement | null>(null);
+
+  const handleGeneratePDF = () => {
+    const element = sessionDetailsRef.current;
+
+    if (element) {
+      // Remover os botões temporariamente
+      const buttons = element.querySelectorAll(
+        ".no-print"
+      ) as NodeListOf<HTMLElement>;
+      buttons.forEach((btn) => (btn.style.display = "none"));
+
+      // Configurações do PDF
+      const options = {
+        margin: 0.5,
+        filename: "Compartilhar Sessão.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+      };
+
+      // Gera o PDF
+      html2pdf()
+        .set(options)
+        .from(element)
+        .save()
+        .finally(() => {
+          // Restaurar a exibição dos botões após gerar o PDF
+          buttons.forEach((btn) => (btn.style.display = ""));
+        });
+    } else {
+      console.error("Elemento não encontrado para gerar PDF.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -58,19 +94,26 @@ const SessionDetails = () => {
       </div>
     );
   }
+  // Dentro do componente SessionDetails
+  const sessionURL = `https://qrious-front-end.onrender.com/sessions/joinqrcode/${session.sessionCode}`;
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
       <main className="container mx-auto px-4 pt-28 max-w-4xl">
-        <Card className="bg-white shadow-lg p-8">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center mb-8 text-[#560bad]">
-              Detalhes da Sessão
+        <GoBack />
+        <Card
+          ref={sessionDetailsRef}
+          className="bg-white shadow-lg p-8"
+          id="session-details"
+        >
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold text-center mb-2 text-[#560bad]">
+              {session.title}
             </CardTitle>
+            <p className="text-lg text-gray-600">{session.description}</p>
           </CardHeader>
           <CardContent className="space-y-8">
-            {/* Seção para QR Code e Código da Sessão */}
             <div className="flex flex-col items-center justify-center space-y-4">
               {session.qrcode ? (
                 <div className="p-4 border-2 border-gray-300 rounded-lg shadow-lg">
@@ -83,31 +126,27 @@ const SessionDetails = () => {
               ) : (
                 <p className="text-red-500">QR Code não disponível</p>
               )}
-              <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-2 rounded-md shadow-md">
+
+              {/* Link clicável do QR Code */}
+              <a
+                href={sessionURL}
+                className="text-blue-500 underline text-center"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {sessionURL}
+              </a>
+
+              <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-2 rounded-md shadow-md flex items-center justify-center">
                 Código da sessão:{" "}
-                <span className="text-2xl text-[#560bad] font-bold">
+                <span className="text-2xl text-[#560bad] font-bold ml-2">
                   {session.sessionCode}
                 </span>
               </p>
             </div>
 
-            {/* Seção para Detalhes da Sessão */}
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {session.title}
-              </h2>
-              <p className="text-lg text-gray-600">{session.description}</p>
-            </div>
-
             {/* Botões de Ação */}
-            <div className="flex justify-center space-x-4">
-              <Button
-                className="bg-black hover:bg-gray-600 text-white"
-                onClick={() => router.push("/home")}
-              >
-                <ArrowLeft className="mr-2 mt-0.5 h-4 w-4" />
-                Página Inicial
-              </Button>
+            <div className="flex justify-center space-x-4 no-print">
               <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                 onClick={() => {
@@ -124,6 +163,7 @@ const SessionDetails = () => {
               >
                 <Share className="mr-2 mt-0.5 h-4 w-4" /> Compartilhar
               </Button>
+              <Button onClick={handleGeneratePDF}>Gerar PDF</Button>
             </div>
           </CardContent>
         </Card>
