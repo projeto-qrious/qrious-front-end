@@ -199,7 +199,7 @@ function Home() {
           <div className="mt-12 mb-6">
             <h2 className="text-2xl font-bold mb-4">Sessões criadas</h2>
             <div className="grid gap-3">
-              {userLoading ? (
+              {speakerLoading ? (
                 // Skeleton loader enquanto as sessões são carregadas
                 Array.from({ length: 4 }).map((_, index) => (
                   <Card
