@@ -31,7 +31,8 @@ function Home() {
   const [newSession, setNewSession] = useState<Session | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [createdSessions, setCreatedSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true); // Estado para controlar o carregamento
+  const [userLoading, setUserLoading] = useState(true);
+  const [speakerLoading, setSpeakerLoading] = useState(true);
   const { toast } = useToast();
 
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -59,8 +60,8 @@ function Home() {
 
   // Função para buscar as sessões que o usuário já entrou e já criou
   useEffect(() => {
-    const loadSessions = async () => {
-      setLoading(true);
+    const loadUserSessions = async () => {
+      setUserLoading(true);
       try {
         if (user?.uid) {
           const userSessions = await fetchUserSessions(user.uid);
@@ -79,11 +80,30 @@ function Home() {
           variant: "destructive",
         });
       } finally {
-        setLoading(false);
+        setSpeakerLoading(false);
       }
     };
 
-    loadSessions();
+    const loadSpeakerSessions = async () => {
+      if (role === "SPEAKER") {
+        setSpeakerLoading(true);
+        try {
+          const createdSessions = await fetchSessionsBySpeaker();
+          setCreatedSessions(createdSessions);
+        } catch (error) {
+          toast({
+            title: "Erro",
+            description: `Falha ao carregar as sessões criadas. ${error}`,
+            variant: "destructive",
+          });
+        } finally {
+          setUserLoading(false);
+        }
+      }
+    };
+
+    loadUserSessions();
+    loadSpeakerSessions();
   }, [user?.uid, role, toast]);
 
   return (
@@ -179,7 +199,7 @@ function Home() {
           <div className="mt-12 mb-6">
             <h2 className="text-2xl font-bold mb-4">Sessões criadas</h2>
             <div className="grid gap-3">
-              {loading ? (
+              {userLoading ? (
                 // Skeleton loader enquanto as sessões são carregadas
                 Array.from({ length: 4 }).map((_, index) => (
                   <Card
@@ -235,7 +255,7 @@ function Home() {
             Sessões que você participa
           </h2>
           <div className="grid gap-3">
-            {loading ? (
+            {userLoading ? (
               // Skeleton loader enquanto as sessões são carregadas
               Array.from({ length: 4 }).map((_, index) => (
                 <Card
