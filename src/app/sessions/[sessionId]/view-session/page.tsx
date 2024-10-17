@@ -5,14 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import { getSessionDetails } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User, Share2, Eye } from "lucide-react"; // Importa o ícone Eye
+import { ThumbsUp, User, Share2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WithAuth } from "@/hoc/withAuth";
 import GoBack from "@/components/goBack";
 import { onValue, ref, DatabaseReference, off } from "firebase/database";
 import { firebaseDatabase } from "@/configs/firebaseconfig";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useQuestionsContext } from "@/contexts/QuestionsContext";
 
 interface Session {
   sessionCode: string;
@@ -39,7 +39,7 @@ function SessionDetails() {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showQuestions, setShowQuestions] = useState(false); // Estado para controlar a visibilidade das perguntas
+  const { showQuestions, toggleShowQuestions } = useQuestionsContext();
 
   const sortedQuestions = useMemo(() => {
     if (session?.questions) {
@@ -53,14 +53,18 @@ function SessionDetails() {
   }, [session?.questions]);
 
   let sessionRef: DatabaseReference | null = null;
+
   useEffect(() => {
     if (sessionId) {
       const fetchSessionDetails = async () => {
         try {
           const sessionData = await getSessionDetails(sessionId as string);
+          if (!sessionData) {
+            throw new Error("Sessão não encontrada");
+          }
           setSession(sessionData);
 
-          // Set up real-time listener for questions
+          // Real-time listener for questions
           sessionRef = ref(firebaseDatabase, `sessions/${sessionId}/questions`);
           onValue(sessionRef, (snapshot) => {
             const questionsData = snapshot.val();
@@ -145,11 +149,13 @@ function SessionDetails() {
                       <img
                         src={session.qrcode}
                         alt="Session QR Code"
-                        className="w-full h-auto"
+                        className={`w-full h-auto ${
+                          showQuestions ? "" : "w-[350px] h-auto"
+                        }`}
                       />
                     </div>
                   ) : (
-                    <p className="text-red-500">QR Code not available</p>
+                    <p className="text-red-500">QR Code não disponível</p>
                   )}
                   <p className="text-base text-gray-800 font-semibold text-center bg-gray-200 px-6 py-2 rounded-md shadow-md">
                     Código:{" "}
@@ -158,16 +164,14 @@ function SessionDetails() {
                     </span>
                   </p>
                   <Button
-                    className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full"
-                    onClick={() => {
-                      setShowQuestions(!showQuestions); // Alterna a visibilidade das perguntas
-                    }}
+                    className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full max-w-[200px]"
+                    onClick={toggleShowQuestions}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     {showQuestions ? "Esconder Perguntas" : "Mostrar Perguntas"}
                   </Button>
                   <Button
-                    className="bg-[#560bad] hover:bg-[#3a0ca3] text-white w-full"
+                    className="bg-[#560bad] hover:bg-[#3a0ca3] text-white w-full max-w-[200px]"
                     onClick={() => {
                       if (navigator.share) {
                         navigator.share({
@@ -206,7 +210,7 @@ function SessionDetails() {
                   >
                     <AnimatePresence>
                       {sortedQuestions.length > 0 ? (
-                        sortedQuestions.map((question, index) => (
+                        sortedQuestions.map((question) => (
                           <motion.div
                             key={question.id}
                             layoutId={question.id}
@@ -219,9 +223,6 @@ function SessionDetails() {
                               stiffness: 500,
                               damping: 30,
                             }}
-                            style={{
-                              zIndex: sortedQuestions.length - index,
-                            }}
                           >
                             <Link
                               href={`/sessions/${sessionId}/questions/${question.id}`}
@@ -232,7 +233,7 @@ function SessionDetails() {
                                   <p className="text-lg mb-2 text-black font-semibold line-clamp-3 break-words">
                                     {question.text}
                                   </p>
-                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 space-y-2 sm:space-y-0">
+                                  <div className="flex justify-between text-sm text-gray-500 space-y-2 sm:space-y-0">
                                     <span className="flex items-center">
                                       <User className="w-4 h-4 mr-1 flex-shrink-0" />
                                       <span className="truncate max-w-[200px]">
@@ -246,7 +247,7 @@ function SessionDetails() {
                                           ? Object.keys(question.votes).length
                                           : 0}
                                       </span>
-                                    </div>{" "}
+                                    </div>
                                   </div>
                                 </CardContent>
                               </Card>
@@ -281,4 +282,4 @@ function SessionDetails() {
   );
 }
 
-export default WithAuth(SessionDetails);
+export default SessionDetails;

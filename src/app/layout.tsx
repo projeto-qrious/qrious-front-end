@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { QuestionsProvider } from "@/contexts/QuestionsContext"; // Importe o novo contexto
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -16,10 +17,12 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <AuthProvider>
-        <body>
-          <Toaster />
-          {children}
-        </body>
+        <QuestionsProvider>
+          <body>
+            <Toaster />
+            {children}
+          </body>
+        </QuestionsProvider>
       </AuthProvider>
     </html>
   );

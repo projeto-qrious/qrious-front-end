@@ -9,7 +9,7 @@ import {
   voteQuestion,
 } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThumbsUp, User, Share2, Check, X } from "lucide-react";
+import { ThumbsUp, User, Share2, Check, X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { WithAuth } from "@/hoc/withAuth";
@@ -21,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { deleteQuestion } from "@/services/sessions";
+// import { useQuestionsContext } from "@/contexts/QuestionsContext";
 
 interface Session {
   sessionCode: string;
@@ -40,7 +41,7 @@ interface Session {
 }
 
 function SessionDetails() {
-  const { user } = useAuth();
+  const { role, user } = useAuth();
   const userId = user?.uid;
   const router = useRouter();
   const params = useParams();
@@ -63,6 +64,7 @@ function SessionDetails() {
     }
     return [];
   }, [session?.questions]);
+  // const { toggleShowQuestions } = useQuestionsContext();
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,32 +255,35 @@ function SessionDetails() {
                           >
                             <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 relative">
                               <CardContent className="p-4 pt-10">
-                                <div className="absolute top-2 right-2 flex space-x-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-green-600 hover:text-white hover:bg-green-600"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleCheck(question.id);
-                                    }}
-                                  >
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-600 hover:text-white hover:bg-red-600"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleDelete(question.id);
-                                    }}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                                {/* Verifica se o usuário é "SPEAKER" para mostrar os botões */}
+                                {role === "SPEAKER" && (
+                                  <div className="absolute top-2 right-2 flex space-x-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-green-600 hover:text-white hover:bg-green-600"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleCheck(question.id);
+                                      }}
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-red-600 hover:text-white hover:bg-red-600"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleDelete(question.id);
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
                                 <p className="text-lg mb-2 text-gray-800 line-clamp-3 break-words">
                                   {question.text}
                                 </p>
@@ -386,6 +391,21 @@ function SessionDetails() {
                     <Share2 className="w-4 h-4 mr-2" />
                     Compartilhar Sessão
                   </Button>
+                  <Link
+                    href={`/sessions/${sessionId}/view-session`}
+                    className="w-full"
+                  >
+                    <Button className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full">
+                      <Eye className="w-4 h-4 mr-2" />
+                      Modo de Visualização
+                    </Button>
+                  </Link>
+                  {/* <Button
+                    className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full max-w-[200px]"
+                    onClick={toggleShowQuestions}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>
