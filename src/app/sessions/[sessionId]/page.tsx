@@ -421,15 +421,17 @@ function SessionDetails() {
                     <Share2 className="w-4 h-4 mr-2" />
                     Compartilhar Sessão
                   </Button>
-                  <Link
-                    href={`/sessions/${sessionId}/view-session`}
-                    className="w-full"
-                  >
-                    <Button className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Modo de Visualização
-                    </Button>
-                  </Link>
+                  {role === "SPEAKER" && (
+                    <Link
+                      href={`/sessions/${sessionId}/view-session`}
+                      className="w-full"
+                    >
+                      <Button className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Modo de Visualização
+                      </Button>
+                    </Link>
+                  )}
                   {/* <Button
                     className="bg-[#000] hover:bg-[#3a0ca3] text-white w-full max-w-[200px]"
                     onClick={toggleShowQuestions}

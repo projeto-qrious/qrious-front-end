@@ -128,11 +128,6 @@ export default function SignIn() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-end">
-                <Link href="/forgot" className="text-sm text-black">
-                  Esqueceu sua senha?
-                </Link>
-              </div>
               <Button
                 type="submit"
                 className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
