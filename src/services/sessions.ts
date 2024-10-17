@@ -116,3 +116,19 @@ export const deleteQuestion = async (sessionId: string, questionId: string) => {
   );
   await remove(questionRef);
 };
+
+export const markQuestionAsAnswered = async (
+  sessionId: string,
+  questionId: string
+) => {
+  try {
+    const response = await api.post(
+      `/sessions/${sessionId}/questions/${questionId}/answer`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error marking question as answered:", error);
+    throw error;
+  }
+};
