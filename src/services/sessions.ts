@@ -1,4 +1,6 @@
 import api from "./api"; // axios com interceptors para enviar o token
+import { ref, remove } from "firebase/database";
+import { firebaseDatabase } from "@/configs/firebaseconfig";
 
 export interface CreateSessionData {
   title: string;
@@ -106,3 +108,11 @@ export async function voteQuestion(sessionId: string, questionId: string) {
     throw error;
   }
 }
+
+export const deleteQuestion = async (sessionId: string, questionId: string) => {
+  const questionRef = ref(
+    firebaseDatabase,
+    `sessions/${sessionId}/questions/${questionId}`
+  );
+  await remove(questionRef);
+};

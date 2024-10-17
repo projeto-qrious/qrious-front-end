@@ -20,6 +20,7 @@ import { firebaseDatabase } from "@/configs/firebaseconfig";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+import { deleteQuestion } from "@/services/sessions";
 
 interface Session {
   sessionCode: string;
@@ -100,7 +101,23 @@ function SessionDetails() {
   };
 
   const handleDelete = async (questionId: string) => {
-    console.log("clicou! delete", questionId);
+    if (confirm("Você tem certeza que deseja excluir esta pergunta?")) {
+      try {
+        await deleteQuestion(sessionId, questionId);
+        toast({
+          title: "Sucesso!",
+          description: "Pergunta excluída com sucesso.",
+        });
+      } catch (error) {
+        console.error("Erro ao excluir a pergunta", error);
+        toast({
+          title: "Erro",
+          description:
+            "Falha ao excluir a pergunta. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleCheck = async (questionId: string) => {
@@ -345,7 +362,7 @@ function SessionDetails() {
                     <p className="text-red-500">QR Code not available</p>
                   )}
                   <p className="text-base text-gray-800 font-semibold text-center bg-gray-200 px-6 py-2 rounded-md shadow-md">
-                    Code:{" "}
+                    Código:{" "}
                     <span className="text-lg text-[#560bad] font-bold">
                       {session.sessionCode}
                     </span>
