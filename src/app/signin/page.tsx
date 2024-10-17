@@ -4,18 +4,14 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  loginUser,
-  signInWithGoogle,
-  signInWithFacebook,
-} from "@/services/auth";
+import { loginUser } from "@/services/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+// import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
+// import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -145,7 +141,7 @@ export default function SignIn() {
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
-            <div className="mt-6">
+            {/* <div className="mt-6">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <Separator />
@@ -176,7 +172,7 @@ export default function SignIn() {
                   Facebook
                 </Button>
               </div>
-            </div>
+            </div> */}
             <p className="mt-6 text-center text-sm text-gray-600">
               Não tem uma conta?{" "}
               <Link
