@@ -7,6 +7,7 @@ import {
   createQuestion,
   getSessionDetails,
   voteQuestion,
+  markQuestionAsAnswered,
 } from "@/services/sessions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThumbsUp, User, Share2, Check, X, Eye } from "lucide-react";
@@ -21,7 +22,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { deleteQuestion } from "@/services/sessions";
-// import { useQuestionsContext } from "@/contexts/QuestionsContext";
+
+interface Question {
+  id: string;
+  text: string;
+  createdBy: string;
+  votes: {
+    [key: string]: boolean;
+  };
+  answered: boolean;
+}
 
 interface Session {
   sessionCode: string;
@@ -29,14 +39,7 @@ interface Session {
   title: string;
   description: string;
   questions?: {
-    [key: string]: {
-      id: string;
-      text: string;
-      createdBy: string;
-      votes: {
-        [key: string]: boolean;
-      };
-    };
+    [key: string]: Question;
   };
 }
 
@@ -57,6 +60,10 @@ function SessionDetails() {
   const sortedQuestions = useMemo(() => {
     if (session?.questions) {
       return Object.values(session.questions).sort((a, b) => {
+        // First, sort by answered status
+        if (a.answered && !b.answered) return 1;
+        if (!a.answered && b.answered) return -1;
+        // Then, sort by votes
         const votesA = a.votes ? Object.keys(a.votes).length : 0;
         const votesB = b.votes ? Object.keys(b.votes).length : 0;
         return votesB - votesA;
@@ -64,7 +71,6 @@ function SessionDetails() {
     }
     return [];
   }, [session?.questions]);
-  // const { toggleShowQuestions } = useQuestionsContext();
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,10 +99,10 @@ function SessionDetails() {
     try {
       await voteQuestion(sessionId, questionId);
     } catch (error) {
-      console.error("Erro ao adicionar uma pergunta", error);
+      console.error("Erro ao votar na pergunta", error);
       toast({
         title: "Erro",
-        description: `Falha ao criar a pergunta. Por favor, tente novamente`,
+        description: `Falha ao votar na pergunta. Por favor, tente novamente`,
         variant: "destructive",
       });
     }
@@ -123,7 +129,21 @@ function SessionDetails() {
   };
 
   const handleCheck = async (questionId: string) => {
-    console.log("clicou! check", questionId);
+    try {
+      await markQuestionAsAnswered(sessionId, questionId);
+      toast({
+        title: "Sucesso!",
+        description: "Pergunta marcada como respondida.",
+      });
+    } catch (error) {
+      console.error("Erro ao marcar a pergunta como respondida", error);
+      toast({
+        title: "Erro",
+        description:
+          "Falha ao marcar a pergunta como respondida. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   let sessionRef: DatabaseReference | null = null;
@@ -253,7 +273,13 @@ function SessionDetails() {
                           <Link
                             href={`/sessions/${sessionId}/questions/${question.id}`}
                           >
-                            <Card className="bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 relative">
+                            <Card
+                              className={`bg-gray-50 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 relative ${
+                                question.answered
+                                  ? "border-l-4 border-green-500"
+                                  : ""
+                              }`}
+                            >
                               <CardContent className="p-4 pt-10">
                                 {/* Verifica se o usuário é "SPEAKER" para mostrar os botões */}
                                 {role === "SPEAKER" && (
@@ -261,7 +287,11 @@ function SessionDetails() {
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8 text-green-600 hover:text-white hover:bg-green-600"
+                                      className={`h-8 w-8 ${
+                                        question.answered
+                                          ? "text-white bg-green-600 hover:bg-green-700"
+                                          : "text-green-600 hover:text-white hover:bg-green-600"
+                                      }`}
                                       onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
