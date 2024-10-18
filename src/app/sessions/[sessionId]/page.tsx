@@ -16,7 +16,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { WithAuth } from "@/hoc/withAuth";
 import GoBack from "@/components/goBack";
 import { useToast } from "@/hooks/use-toast";
-import { onValue, ref, DatabaseReference, off } from "firebase/database";
+import {
+  onValue,
+  ref,
+  DatabaseReference,
+  off,
+  get,
+  child,
+} from "firebase/database";
 import { firebaseDatabase } from "@/configs/firebaseconfig";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,6 +60,7 @@ function SessionDetails() {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [newQuestion, setNewQuestion] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -146,6 +154,33 @@ function SessionDetails() {
     }
   };
 
+  const fetchUserName = async (userId: string) => {
+    try {
+      const dbRef = ref(firebaseDatabase);
+      const snapshot = await get(child(dbRef, `users/${userId}`));
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        return userData.displayName || "Usuário desconhecido";
+      } else {
+        return "Usuário desconhecido";
+      }
+    } catch (error) {
+      console.error("Erro ao buscar nome do usuário:", error);
+      return "Erro ao carregar usuário";
+    }
+  };
+
+  const fetchUserNames = async (questions: { [key: string]: Question }) => {
+    const names: { [key: string]: string } = {};
+    await Promise.all(
+      Object.values(questions).map(async (question) => {
+        const name = await fetchUserName(question.createdBy);
+        names[question.createdBy] = name;
+      })
+    );
+    setUserNames(names);
+  };
+
   let sessionRef: DatabaseReference | null = null;
   useEffect(() => {
     if (sessionId) {
@@ -154,19 +189,22 @@ function SessionDetails() {
           const sessionData = await getSessionDetails(sessionId as string);
           setSession(sessionData);
 
-          // Set up real-time listener for questions
-          sessionRef = ref(firebaseDatabase, `sessions/${sessionId}/questions`);
+          if (sessionData?.questions) {
+            await fetchUserNames(sessionData.questions); // Busca os nomes dos usuários
+          }
+
+          const sessionRef = ref(
+            firebaseDatabase,
+            `sessions/${sessionId}/questions`
+          );
           onValue(sessionRef, (snapshot) => {
             const questionsData = snapshot.val();
             if (questionsData) {
               setSession((prevSession) => {
                 if (!prevSession) return null;
-
-                return {
-                  ...prevSession,
-                  questions: questionsData,
-                };
+                return { ...prevSession, questions: questionsData };
               });
+              fetchUserNames(questionsData);
             }
           });
         } catch (error) {
@@ -176,6 +214,7 @@ function SessionDetails() {
           setLoading(false);
         }
       };
+
       fetchSessionDetails();
     }
 
@@ -321,7 +360,8 @@ function SessionDetails() {
                                   <span className="flex items-center">
                                     <User className="w-4 h-4 mr-1 flex-shrink-0" />
                                     <span className="truncate max-w-[200px]">
-                                      {question.createdBy}
+                                      {userNames[question.createdBy] ||
+                                        "Carregando..."}
                                     </span>
                                   </span>
                                   <Button

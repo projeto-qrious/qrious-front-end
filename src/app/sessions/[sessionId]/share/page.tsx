@@ -106,7 +106,7 @@ const SessionDetails = () => {
             </div>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 w-full">
               <Button
-                className="bg-[#560bad] hover:bg-[#3a0ca3] text-white text-lg md:text-xl py-4 px-6 w-full sm:w-auto"
+                className="bg-[#560bad] hover:bg-[#3a0ca3] text-white text-lg md:text-xl w-full sm:w-auto"
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
