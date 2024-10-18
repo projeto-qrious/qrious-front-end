@@ -80,7 +80,7 @@ function Home() {
           variant: "destructive",
         });
       } finally {
-        setSpeakerLoading(false);
+        setUserLoading(false);
       }
     };
 
@@ -97,7 +97,7 @@ function Home() {
             variant: "destructive",
           });
         } finally {
-          setUserLoading(false);
+          setSpeakerLoading(false);
         }
       }
     };
