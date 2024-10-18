@@ -409,7 +409,7 @@ function SessionDetails() {
                         navigator.share({
                           title: "Entre na minha sessão no QRious",
                           text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
-                          url: window.location.href,
+                          url: `https://qrious-front-end.onrender.com/sessions/joinqrcode/${session.sessionCode}`,
                         });
                       } else {
                         alert(
