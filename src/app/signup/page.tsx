@@ -9,9 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Lock, User, Eye, EyeOff, Phone } from "lucide-react";
-import { useSearchParams } from "next/navigation"; // Importando useSearchParams
-// import { Separator } from "@/components/ui/separator";
-// import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
+import { useSearchParams } from "next/navigation";
 
 function SignUpForm({ redirectTo }: { redirectTo: string }) {
   const [email, setEmail] = useState("");
@@ -20,6 +18,7 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -31,6 +30,12 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
   }, [user, loading, router, redirectTo]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    if (password.length < 6) {
+      setError("A senha deve ter no mínimo 6 caracteres.");
+      event.preventDefault();
+
+      return;
+    }
     event.preventDefault();
     setIsLoading(true);
 
@@ -146,7 +151,7 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
             value={phoneNumber}
             onChange={handlePhoneChange}
             className="pl-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-            placeholder="Digite seu email"
+            placeholder="Digite o número do celular"
             required
             disabled={isLoading}
           />
@@ -159,20 +164,23 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
         >
           Senha
         </label>
+
         <div className="mt-1 relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Lock className="h-5 w-5 text-gray-400" />
           </div>
+
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="pl-10 pr-10 border-gray-300 focus:ring-[#560bad] focus:border-[#560bad]"
-            placeholder="Digite sua senha"
+            className="pl-10 pr-10 w-full border border-gray-300 rounded-md focus:ring-[#560bad] focus:border-[#560bad]"
+            placeholder="Insira no mínimo 6 caracteres"
             required
             disabled={isLoading}
           />
+
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
             <button
               type="button"
@@ -188,7 +196,13 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
             </button>
           </div>
         </div>
+
+        {/* Alinhamento correto da mensagem de erro */}
+        {error && (
+          <p className="mt-2 text-sm text-red-500 text-left">{error}</p>
+        )}
       </div>
+
       <Button
         type="submit"
         className="w-full bg-[#560bad] hover:bg-[#3a0ca3] text-white"
