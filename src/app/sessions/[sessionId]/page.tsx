@@ -181,7 +181,7 @@ function SessionDetails() {
     setUserNames(names);
   };
 
-  let sessionRef: DatabaseReference | null = null;
+  const sessionRef: DatabaseReference | null = null;
   useEffect(() => {
     if (sessionId) {
       const fetchSessionDetails = async () => {
