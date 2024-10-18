@@ -1,13 +1,14 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { getSessionDetails } from "@/services/sessions";
+import { getSessionDetails, joinSession } from "@/services/sessions";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtectedRoute from "@/hoc/protectedRoutes";
 import GoBack from "@/components/goBack";
 import html2pdf from "html2pdf.js";
+import { ArrowRight, Share } from "lucide-react";
 
 interface Session {
   sessionCode: string;
@@ -25,6 +26,7 @@ const SessionDetails = () => {
     : params?.sessionId;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const sessionDetailsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (sessionId) {
@@ -43,38 +45,67 @@ const SessionDetails = () => {
     }
   }, [sessionId, router]);
 
-  const sessionDetailsRef = useRef<HTMLDivElement | null>(null);
+  const handleJoinSession = async () => {
+    const sessionCode = session?.sessionCode;
+    if (!sessionCode) return;
 
-  const handleGeneratePDF = () => {
+    setLoading(true);
+    try {
+      const { sessionId: returnedSessionId } = await joinSession(
+        null,
+        sessionCode
+      );
+      router.push(`/sessions/${returnedSessionId}`);
+    } catch (err: unknown) {
+      console.error("Erro ao entrar na sessão: ", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateAndSharePDF = async () => {
     const element = sessionDetailsRef.current;
 
     if (element) {
-      // Remover os botões temporariamente
       const buttons = element.querySelectorAll(
         ".no-print"
       ) as NodeListOf<HTMLElement>;
       buttons.forEach((btn) => (btn.style.display = "none"));
 
-      // Configurações do PDF
       const options = {
-        margin: 0.5,
-        filename: "Compartilhar Sessão.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        margin: 0,
+        filename: "Compartilhar_Sessao.pdf",
+        image: { type: "jpeg", quality: 1.0 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+        },
+        jsPDF: { unit: "pt", format: "a4", orientation: "portrait" },
       };
 
-      // Gera o PDF
-      html2pdf()
-        .set(options)
-        .from(element)
-        .save()
-        .finally(() => {
-          // Restaurar a exibição dos botões após gerar o PDF
-          buttons.forEach((btn) => (btn.style.display = ""));
-        });
-    } else {
-      console.error("Elemento não encontrado para gerar PDF.");
+      try {
+        const pdfBlob = await html2pdf()
+          .set(options)
+          .from(element)
+          .outputPdf("blob");
+        buttons.forEach((btn) => (btn.style.display = ""));
+
+        if (navigator.share) {
+          const file = new File([pdfBlob], "compartilhar_sessao.pdf", {
+            type: "application/pdf",
+          });
+
+          await navigator.share({
+            files: [file],
+            title: "Compartilhar Sessão",
+            text: "Veja o PDF da sessão.",
+          });
+        } else {
+          alert("Compartilhamento não é suportado nesse navegador.");
+        }
+      } catch (error) {
+        console.error("Erro ao gerar ou compartilhar PDF:", error);
+      }
     }
   };
 
@@ -93,8 +124,8 @@ const SessionDetails = () => {
       </div>
     );
   }
-  // Dentro do componente SessionDetails
-  const sessionURL = `https://qrious-front-end.onrender.com/sessions/joinqrcode/${session.sessionCode}`;
+
+  const sessionURL = `https://qrious-front-end.onrender.com`;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -103,7 +134,7 @@ const SessionDetails = () => {
         <GoBack />
         <Card
           ref={sessionDetailsRef}
-          className="bg-white shadow-lg p-8"
+          className="flex flex-col justify-center items-center min-h-screen bg-white shadow-lg"
           id="session-details"
         >
           <CardHeader className="text-center">
@@ -113,65 +144,52 @@ const SessionDetails = () => {
             <p className="text-lg text-gray-600">{session.description}</p>
           </CardHeader>
           <CardContent className="space-y-8">
-            <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="flex flex-col items-center space-y-4">
               {session.qrcode ? (
                 <div className="p-4 border-2 border-gray-300 rounded-lg shadow-lg">
                   <img
                     src={session.qrcode}
                     alt="QR Code da Sessão"
-                    className="mx-auto w-full h-full"
+                    className="mx-auto w-full h-auto"
                   />
                 </div>
               ) : (
                 <p className="text-red-500">QR Code não disponível</p>
               )}
-
-              {/* Link clicável do QR Code */}
               <a
                 href={sessionURL}
-                className="text-blue-500 underline text-center"
+                className="text-blue-500 underline"
                 target="_blank"
-                rel="noopener noreferrer"
               >
                 {sessionURL}
               </a>
-
-              <p className="text-lg text-gray-800 font-semibold text-center bg-gray-200 p-2 rounded-md shadow-md flex items-center justify-center">
+              <p className="text-lg text-gray-800 font-semibold p-2">
                 Código da sessão:{" "}
-                <span className="text-2xl text-[#560bad] font-bold ml-2">
+                <span className="text-2xl text-[#560bad] font-bold">
                   {session.sessionCode}
                 </span>
               </p>
             </div>
 
-            {/* Botões de Ação */}
             <div className="flex justify-center space-x-4 no-print">
-              <a href={sessionURL}>
-                <Button className="bg-[#560bad] hover:bg-[#3a0ca3] text-white">
-                  Entrar
-                </Button>
-              </a>
-              {/* <Button
-                className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: "Entre na minha sessão no QRious",
-                      text: `Use o código ${session.sessionCode} ou aponte a câmera para o QR code para entrar na minha sessão no QRious.`,
-                      url: window.location.href,
-                    });
-                  } else {
-                    alert("Compartilhamento não é suportado nesse navegador.");
-                  }
-                }}
-              >
-                <Share className="mr-2 mt-0.5 h-4 w-4" /> Compartilhar
-              </Button> */}
               <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
-                onClick={handleGeneratePDF}
+                onClick={handleGenerateAndSharePDF}
               >
-                Compartilhar
+                <Share className="mr-2 mt-0.5 h-4 w-4" /> Compartilhar
+              </Button>
+              <Button
+                onClick={handleJoinSession}
+                disabled={loading}
+                className="bg-black hover:bg-[#3a0ca3] text-white"
+              >
+                {loading ? (
+                  "Entrando"
+                ) : (
+                  <>
+                    Entrar <ArrowRight className="ml-2 mt-0.5 h-4 w-4" />
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
