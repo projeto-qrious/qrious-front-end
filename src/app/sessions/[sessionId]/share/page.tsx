@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtectedRoute from "@/hoc/protectedRoutes";
-import { Share } from "lucide-react";
 import GoBack from "@/components/goBack";
 import html2pdf from "html2pdf.js";
 
@@ -147,7 +146,12 @@ const SessionDetails = () => {
 
             {/* Botões de Ação */}
             <div className="flex justify-center space-x-4 no-print">
-              <Button
+              <a href={sessionURL}>
+                <Button className="bg-[#560bad] hover:bg-[#3a0ca3] text-white">
+                  Entrar
+                </Button>
+              </a>
+              {/* <Button
                 className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
                 onClick={() => {
                   if (navigator.share) {
@@ -162,8 +166,13 @@ const SessionDetails = () => {
                 }}
               >
                 <Share className="mr-2 mt-0.5 h-4 w-4" /> Compartilhar
+              </Button> */}
+              <Button
+                className="bg-[#560bad] hover:bg-[#3a0ca3] text-white"
+                onClick={handleGeneratePDF}
+              >
+                Compartilhar
               </Button>
-              <Button onClick={handleGeneratePDF}>Gerar PDF</Button>
             </div>
           </CardContent>
         </Card>
