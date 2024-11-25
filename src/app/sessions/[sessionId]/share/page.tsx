@@ -79,7 +79,7 @@ const SessionDetails = () => {
     );
   }
 
-  const sessionURL = `https://qrious-front-end.onrender.com`;
+  const sessionURL = `https://qrious-front-end-5863.onrender.com`;
 
   return (
     <div className="min-h-screen bg-gray-100">
