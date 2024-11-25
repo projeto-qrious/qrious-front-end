@@ -49,9 +49,13 @@ function SignUpForm({ redirectTo }: { redirectTo: string }) {
       router.push(redirectTo);
     } catch (error) {
       console.error("Erro ao registrar: ", error);
+      const errorMessage =
+        (error as any).response?.data?.error ||
+        "Falha ao criar a conta. Por favor, tente novamente.";
+      setError(errorMessage);
       toast({
         title: "Erro",
-        description: "Falha ao criar a conta. Por favor, tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

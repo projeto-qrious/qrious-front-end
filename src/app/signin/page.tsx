@@ -41,11 +41,16 @@ export default function SignIn() {
       await loginUser(email, password);
       toast({ title: "Sucesso", description: "Login bem-sucedido!" });
       router.push(redirectTo);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao fazer login: ", error);
+      let errorMessage = "Falha ao fazer login. Por favor, tente novamente.";
+
+      if (error.code === "auth/invalid-credential") {
+        errorMessage = "Usuário não cadastrado.";
+      }
       toast({
         title: "Erro",
-        description: "Falha ao fazer login. Por favor, tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
