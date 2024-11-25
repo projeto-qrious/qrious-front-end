@@ -8,10 +8,8 @@ import { loginUser } from "@/services/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-// import { FaGoogle as Google, FaFacebook as Facebook } from "react-icons/fa";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -21,11 +19,11 @@ export default function SignIn() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [redirectTo, setRedirectTo] = useState("/home"); // Mova o estado para aqui
+  const [redirectTo, setRedirectTo] = useState("/home");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    setRedirectTo(searchParams.get("redirect") || "/home"); // Atualize o redirecionamento aqui
+    setRedirectTo(searchParams.get("redirect") || "/home");
   }, []);
 
   useEffect(() => {
@@ -41,11 +39,11 @@ export default function SignIn() {
       await loginUser(email, password);
       toast({ title: "Sucesso", description: "Login bem-sucedido!" });
       router.push(redirectTo);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao fazer login: ", error);
       let errorMessage = "Falha ao fazer login. Por favor, tente novamente.";
 
-      if (error.code === "auth/invalid-credential") {
+      if ((error as { code?: string }).code === "auth/invalid-credential") {
         errorMessage = "Usuário não cadastrado.";
       }
       toast({
